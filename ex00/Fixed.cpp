@@ -5,10 +5,9 @@ void print_msg(std::string msg)
     std::cout << msg <<std::endl;
 }
 
-Fixed::Fixed(void)
+Fixed::Fixed(void) : value_(0)
 {
     std::cout << "Default constructor called" <<std::endl;
-    this->_value = 0;
 }
 
 Fixed::~Fixed(void)
