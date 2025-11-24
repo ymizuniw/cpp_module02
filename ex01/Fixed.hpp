@@ -22,4 +22,9 @@ class Fixed
         int     toInt(void) const;
 };
 
+//An overload of the insertion («) operator that inserts a floating-point representation
+// of the fixed-point number into the output stream object passed as a parameter.
+
+void std::ofstream &operator<<(std::ofstream &ofs, Fixed fixed);
+
 #endif

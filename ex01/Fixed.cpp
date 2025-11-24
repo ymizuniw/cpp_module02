@@ -11,8 +11,6 @@
 //when multiplication and devision, if there is possibility of overflow,
 //then cast to bigger type and culculate it.
 
-
-
 Fixed::Fixed(const int n) :value_(n)
 {
     std::cout << "int constructor called." << std::endl;
@@ -58,3 +56,14 @@ scope limitation
 has the effect to limit the life-time of pointer.
 */
 
+std::ostream &operator<<(std::ostream &os, Fixed &fixed)
+{
+    int value_local = fixed.getRawBits();
+    //0x00 0x00 0x00 . 0x00
+    int fractional_mask = 0b0000000000000000000000001111;//32bit
+    int fractional_part = value_local & fractional_mask;
+    int integer_part = fixed.toInt();
+    std::string buf;
+    buf = std::to_string(integer_part) + "." + std::to_string(fractional_part);
+    std::cout << buf << std::endl;
+}
