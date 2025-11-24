@@ -41,7 +41,6 @@ int Fixed::toInt(void) const
     return (value_ >> fbits_); //value/2^8
 }
 
-
 //unique_ptr<> cannnot be assigned.
 //if you want to move the ownership, use move(unique_ptr);
 //the previous ptr gets nullptr.
