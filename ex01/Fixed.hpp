@@ -25,6 +25,7 @@ class Fixed
 //An overload of the insertion («) operator that inserts a floating-point representation
 // of the fixed-point number into the output stream object passed as a parameter.
 
-void std::ofstream &operator<<(std::ofstream &ofs, Fixed fixed);
+std::ostream &operator<<(std::ostream &os, const Fixed &fixed);
+// std::string &operator<<(std::ostream &os, Fixed fixed);
 
 #endif
