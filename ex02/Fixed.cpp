@@ -110,90 +110,162 @@ std::ostream &operator<<(std::ostream &os, const Fixed &fixed)
     return (os);
 }
 
-// bool Fixed::operator>(const Fixed &other) const
-// {
-//     if (value_>other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator>(const Fixed &other) const
+{
+    if (value_>other.value_)
+        return (true);
+    return (false);
+}
 
-// bool Fixed::operator<(const Fixed &other) const
-// {
-//     if (value_<other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator<(const Fixed &other) const
+{
+    if (value_<other.value_)
+        return (true);
+    return (false);
+}
 
-// bool Fixed::operator>=(const Fixed &other) const
-// {
-//     if (value_>=other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator>=(const Fixed &other) const
+{
+    if (value_>=other.value_)
+        return (true);
+    return (false);
+}
 
-// bool Fixed::operator<=(const Fixed &other) const
-// {
-//     if (value_>=other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator<=(const Fixed &other) const
+{
+    if (value_>=other.value_)
+        return (true);
+    return (false);
+}
 
-// bool Fixed::operator==(const Fixed &other) const
-// {
-//     if (value_==other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator==(const Fixed &other) const
+{
+    if (value_==other.value_)
+        return (true);
+    return (false);
+}
 
-// bool Fixed::operator!=(const Fixed &other) const
-// {
-//     if (value_>=other.value_)
-//         return (true);
-//     return (false);
-// }
+bool Fixed::operator!=(const Fixed &other) const
+{
+    if (value_!=other.value_)
+        return (true);
+    return (false);
+}
 
-// Fixed   &Fixed::operator+(const Fixed &other) const
-// {
-//     Fixed res;
-//     res.value_ = value_ + other.value_;
-//     return (res);
-// }
+bool    (*overflow_check)(int value1, int value2, int negative_limit, int positive_limit);
 
-// Fixed   &Fixed::operator-(const Fixed &other) const
-// {
-//     Fixed res;
-//     res.value_ = value_ - other.value_;
-//     return (res);
-// }
+#define FIXED_UFLIMIT -8388608
+#define FIXED_OFLIMIT 8388608
 
-// Fixed   &Fixed::operator*(const Fixed &other) const
-// {
-//     Fixed res;
-//     res.value_ = value_ * other.value_;
-//     return (res);
-// }
+bool add(int value1, int value2, int negative_limit, int positive_limit)
+{
+    // + + +
+    if (value1>0 && value2>0)
+    {
+        if (value1 > positive_limit - value2)
+        {
+            std::cerr << "overflow: " << std::endl;
+            return (true);
+        }
+    }
+    else if (value1 < 0 && value2 <0)//uflow
+    {
+        if (value1 > negative_limit - value2)
+        {
+            std::cerr << "underflow: " << std::endl;
+            return (true);
+        }
+    }
+    return (false);
+    // //+ + -
+    // else if (value1 > 0 && value2 < 0)//ok. but for safety.
+    // //- + +
+}
 
-// Fixed   &Fixed::operator/(const Fixed &other) const
-// {
-//     Fixed res;
-//     res.value_ = value_ / other.value_;
-//     return (res);
-// }
+bool subtract(int value1, int value2, int negative_limit, int positive_limit)
+{
+    return false;
+}
 
-// //postfix increment
-// Fixed   Fixed::operator++(int)
-// {
-//     Fixed tmp(*this);
-//     value_+=(1<<fbits_);
-//     return (tmp);
-// }
+bool multi(int value1, int value2, int negative_limit, int positive_limit)
+{
+    return false;
+}
 
-// Fixed   Fixed::operator--(int)
-// {
-//     Fixed tmp(*this);
-//     value_-+(1<<fbits_);
-//     return (tmp);
-// }
+bool devide(int value1, int value2, int negative_limit, int positive_limit)
+{
+    return false;
+}
+
+//8388608 threshold;
+Fixed   &Fixed::operator+(const Fixed &other) const
+{
+    Fixed res;
+    int value1 = value_;
+    int value2 = other.value_;
+    overflow_check = add;
+    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    res.value_ = value_ + other.value_;
+    return (res);
+}
+
+Fixed   &Fixed::operator-(const Fixed &other) const
+{
+    Fixed res;
+    int value1 = value_;
+    int value2 = other.value_;
+
+    overflow_check = subtract;
+    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    res.value_ = value_ - other.value_;
+    return (res);
+}
+
+Fixed   &Fixed::operator*(const Fixed &other) const
+{
+    Fixed res;
+    int value1 = value_;
+    int value2 = other.value_;
+
+    overflow_check = multi;
+    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    res.value_ = value_ * other.value_;
+    return (res);
+}
+
+Fixed   &Fixed::operator/(const Fixed &other) const
+{
+    Fixed res;
+    int value1 = value_;
+    int value2 = other.value_;
+
+    overflow_check = devide;
+    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    res.value_ = value_ / other.value_;
+    return (res);
+}
+
+//overflow check lacks.
+Fixed   Fixed::operator++(int)
+{
+    Fixed tmp(*this);
+    value_ += 0b01;//or +=1
+    // value_+=(1<<fbits_);
+    return (tmp);
+}
+
+//underflow check lacks.
+Fixed   Fixed::operator--(int)
+{
+    Fixed tmp(*this);
+    value_ -= 0b01;//or -=1
+    // value_-+(1<<fbits_);
+    return (tmp);
+}
 
 // //prefix increment
 // Fixed   &Fixed::operator++(void)
