@@ -1,54 +1,80 @@
 #include "Fixed.hpp"
+#include <limits>
 
-// #define DoubleToFixed(x) (x*(double)(1<<scale))
-// #define FixedToDouble(x) ((double)x / (double)(1<<scale))
-// #define IntToFixed(x) (x << scale)
-// #define FixedToInt(x) (x >> scale)
-// #define MUL(x,y) (((x)*(y)) >> scale)
-// #define DIV(x,y) ((x) << scale)
-// https://stackoverflow.com/questions/67517939/how-to-connect-the-theory-of-fixed-point-numbers-and-its-practical-implementatio
-
-//when multiplication and devision, if there is possibility of overflow,
-//then cast to bigger type and culculate it.
-
-Fixed::Fixed() : value_(0)
+void print_msg(std::string msg)
 {
-    std::cout << "Fixed::default constructor called." << std::endl;
+    std::cout << msg <<std::endl;
 }
 
-Fixed::Fixed(const Fixed &src)
+Fixed::Fixed(void) : value_(0)
 {
-    std::cout << "Fixed::Copy constructor called." << std::endl;
-    value_=src.getRawBits();
+    print_msg("Fixed::Default constructor called");
 }
 
-Fixed::Fixed(const int n) :value_(n)
+Fixed::Fixed(const Fixed &other) : value_(other.value_)
 {
-    std::cout << "Fixed::constructor called." << std::endl;
+    print_msg("Fixed::Copy constructor called");
 }
 
-/*
-    if f == 3.1415;
-    then value_ = 3.1415 * 2^8
-*/
-Fixed::Fixed(const float f): value_((int)roundf(f*(1<<fbits_)))
+Fixed::~Fixed(void)
 {
-    std::cout << "Fixed::Float constructur called." << std::endl;
+    print_msg("Fixed::destructor called");
 }
 
-Fixed::~Fixed()
+Fixed &Fixed::operator=(Fixed const &other)
 {
-    std::cout << "Fixed::Default destructor called" << std::endl;
+    print_msg("Fixed::Copy assignment operator called");
+    // value_=other.getRawBits();
+    value_=other.value_;
+    return (*this);
 }
 
-int Fixed::getRawBits() const
+int     Fixed::getRawBits(void) const
 {
     return (value_);
 }
 
-void Fixed::setRawBits(int const value)
+void    Fixed::setRawBits(int const raw)
 {
-    value_=value;
+    print_msg("Fixed::setRawBits() called");    
+    value_ = raw;
+}
+
+//ex01 NEW
+/*
+    if f == 3.1415;
+    then value_ = 3.1415 * 2^8
+*/
+/*
+    +8,388,608
+    -8,388,608
+*/
+
+Fixed::Fixed(const int value) : value_(value<<fbits_)
+{
+    if (value>0x8000 - 0x0001)
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+   else if (value < -(0x8000 - 0x0001))
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    print_msg("Fixed::int value constructor called");
+}
+
+//float -> int -> shift
+Fixed::Fixed(const float value)
+{
+    print_msg("Fixed::float value constructor called");
+    if (value>static_cast<float>(0x8000 - 0x0001))
+        std::cerr << "recept float value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    else if (value < -static_cast<float>(0x8000 - 0x0001))
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    //shift float
+    float shift = value * (1<<fbits_);
+    float round = roundf(shift);
+    int    cast = static_cast<int>(round);
+    std::cout << "Fixed::assignment constructor: float casted to " << cast << std::endl;
+    value_ = cast;
+    //cast to int
+    // value_ = (static_cast<int>(roundf(value*(1<<fbits_))));
 }
 
 /*
@@ -58,7 +84,6 @@ void Fixed::setRawBits(int const value)
 float Fixed::toFloat(void) const
 {
     // return ((float)value_ / (1 << fbits_));
-
     int divisor = (1<<fbits_);
     /*
         fbits_=8;
@@ -90,39 +115,23 @@ int Fixed::toInt(void) const
     return (value_ >> fbits_);
 }
 
-//unique_ptr<> cannnot be assigned.
-//if you want to move the ownership, use move(unique_ptr);
-//the previous ptr gets nullptr.
-
-//shared_ptr<> can share the ownership.
-//shPtr.use_count() gets the count of the current oweners.
-
-//weak_ptr<> won't have the ownership of shared_ptr, but it can refer to it.
-//the count of shared_ptr won't increase.
-
-/*
-scope limitation
-{
-}
-has the effect to limit the life-time of pointer.
-*/
-
-Fixed &Fixed::operator=(Fixed const &other)
-{
-    std::cout <<"Copy assignment operator called" << std::endl;
-    value_=other.getRawBits();
-    return (*this);
-}
-
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed)
 {
-    int value_local = fixed.getRawBits();
+    // int value_local = fixed.getRawBits();
     //0x00 0x00 0x00 . 0x00
-    int fractional_mask = 0b0000000000000000000000001111;//32bit:0x0008
-    int fractional_part = value_local & fractional_mask;
-    int integer_part = fixed.toInt();
-    std::string buf;
-    buf = std::to_string(integer_part) + "." + std::to_string(fractional_part);
-    os << buf;
+    /*
+        LSB: 8bit : 256 : 0b0000 0000 : 0x0011
+    */
+    // int fractional_mask = 0xFF;
+    // int fractional_part = value_local & fractional_mask;
+    // int integer_part = fixed.toInt();
+    // std::cout << "value_local: " << value_local << std::endl;
+    // std::cout << "fractional mask: " << fractional_mask << std::endl;
+    // std::cout << "fractional_part: " << fractional_part << std::endl;
+    // std::cout << "fractional_part: " << fractional_part << std::endl;
+    // std::string buf;
+    // buf = std::to_string(integer_part) + "." + std::to_string(fractional_part);
+    // os << buf;
+    os << fixed.toFloat();
     return (os);
 }
