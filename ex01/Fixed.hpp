@@ -26,6 +26,5 @@ class Fixed
 // of the fixed-point number into the output stream object passed as a parameter.
 
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed);
-// std::string &operator<<(std::ostream &os, Fixed fixed);
 
 #endif

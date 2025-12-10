@@ -7,17 +7,34 @@ void print_msg(std::string msg)
 
 Fixed::Fixed(void) : value_(0)
 {
-    std::cout << "Default constructor called" <<std::endl;
+    print_msg("Fixed::Default constructor called");
+}
+
+Fixed::Fixed(const Fixed &other) : value_(other.value_)
+{
+    print_msg("Fixed::Copy constructor called");
 }
 
 Fixed::~Fixed(void)
 {
-    std::cout << "destructor called" <<std::endl;
+    print_msg("Fixed::destructor called");
 }
 
 Fixed &Fixed::operator=(Fixed const &other)
 {
-    std::cout <<"Copy assignment operator called" << std::endl;
+    print_msg("Fixed::Copy assignment operator called");
     value_=other.getRawBits();
     return (*this);
+}
+
+int     Fixed::getRawBits(void) const
+{
+    print_msg("Fixed::getRawBits() called");
+    return (value_);
+}
+
+void    Fixed::setRawBits(int const raw)
+{
+    print_msg("Fixed::setRawBits() called");    
+    value_ = raw;
 }
