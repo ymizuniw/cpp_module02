@@ -24,7 +24,6 @@ Fixed::~Fixed(void)
 Fixed &Fixed::operator=(Fixed const &other)
 {
     print_msg("Fixed::Copy assignment operator called");
-    // value_=other.getRawBits();
     value_=other.value_;
     return (*this);
 }
@@ -73,8 +72,6 @@ Fixed::Fixed(const float value)
     int    cast = static_cast<int>(round);
     std::cout << "Fixed::assignment constructor: float casted to " << cast << std::endl;
     value_ = cast;
-    //cast to int
-    // value_ = (static_cast<int>(roundf(value*(1<<fbits_))));
 }
 
 /*
@@ -96,19 +93,8 @@ float Fixed::toFloat(void) const
         inverse_divisor = 0.00390625;
     */
     float result = static_cast<float>(value_) * inverse_divisor;
-    /*
-        value_= 0d10 = 0b1010; 
-        result = <float>(value_) * <flaot>(inverse_divisor);
-        result = 10.0000 * 0.0390625;
-        result = 0.390625;
-        <int>culculation
-        result = 0b1010 / (1<<fbits_);
-        result ?=0.012265625;
-    */
     return (result);
 }
-
-// 0x00 0x00 0x00 0x00
 
 int Fixed::toInt(void) const
 {
@@ -117,21 +103,6 @@ int Fixed::toInt(void) const
 
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed)
 {
-    // int value_local = fixed.getRawBits();
-    //0x00 0x00 0x00 . 0x00
-    /*
-        LSB: 8bit : 256 : 0b0000 0000 : 0x0011
-    */
-    // int fractional_mask = 0xFF;
-    // int fractional_part = value_local & fractional_mask;
-    // int integer_part = fixed.toInt();
-    // std::cout << "value_local: " << value_local << std::endl;
-    // std::cout << "fractional mask: " << fractional_mask << std::endl;
-    // std::cout << "fractional_part: " << fractional_part << std::endl;
-    // std::cout << "fractional_part: " << fractional_part << std::endl;
-    // std::string buf;
-    // buf = std::to_string(integer_part) + "." + std::to_string(fractional_part);
-    // os << buf;
     os << fixed.toFloat();
     return (os);
 }

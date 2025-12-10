@@ -1,206 +1,227 @@
 
 #include "Fixed.hpp"
 
-Fixed::Fixed() : value_(0)
+#include "Fixed.hpp"
+#include <limits>
+
+void print_msg(std::string msg)
 {
-    std::cout << "default constructor called." << std::endl;
+    std::cout << msg <<std::endl;
 }
 
-Fixed::Fixed(const Fixed &src)
+Fixed::Fixed(void) : value_(0)
 {
-    std::cout << "Copy constructor called." << std::endl;
-    value_=src.getRawBits();
+    print_msg("Fixed::Default constructor called");
 }
 
-Fixed::Fixed(const int n) :value_(n)
+Fixed::Fixed(const Fixed &other) : value_(other.value_)
 {
-    std::cout << "int constructor called." << std::endl;
+    print_msg("Fixed::Copy constructor called");
 }
 
-Fixed::Fixed(const float f): value_(static_cast<int>(roundf(f*(1<<fbits_))))
+Fixed::~Fixed(void)
 {
-    std::cout << "Float constructur called" << std::endl;
+    print_msg("Fixed::destructor called");
 }
 
-Fixed::~Fixed()
+Fixed &Fixed::operator=(Fixed const &other)
 {
-    std::cout << "Default destructor called" << std::endl;
+    print_msg("Fixed::Copy assignment operator called");
+    value_=other.value_;
+    return (*this);
 }
 
-int Fixed::getRawBits() const
+int     Fixed::getRawBits(void) const
 {
     return (value_);
 }
 
-void Fixed::setRawBits(int const value)
+void    Fixed::setRawBits(int const raw)
 {
-    value_=value;
+    print_msg("Fixed::setRawBits() called");    
+    value_ = raw;
 }
 
-//initially cast to float
+//ex01 NEW
+/*
+    if f == 3.1415;
+    then value_ = 3.1415 * 2^8
+*/
+/*
+    +8,388,608
+    -8,388,608
+*/
+
+Fixed::Fixed(const int value) : value_(value<<fbits_)
+{
+    if (value>0x8000 - 0x0001)
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+   else if (value < -(0x8000 - 0x0001))
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    print_msg("Fixed::int value constructor called");
+}
+
+//float -> int -> shift
+Fixed::Fixed(const float value)
+{
+    print_msg("Fixed::float value constructor called");
+    if (value>static_cast<float>(0x8000 - 0x0001))
+        std::cerr << "recept float value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    else if (value < -static_cast<float>(0x8000 - 0x0001))
+        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    //shift float
+    float shift = value * (1<<fbits_);
+    float round = roundf(shift);
+    int    cast = static_cast<int>(round);
+    std::cout << "Fixed::assignment constructor: float casted to " << cast << std::endl;
+    value_ = cast;
+}
+
+/*
+    if value_ == 0010 1010 0000 0000 ...
+    then ret = (float)(value_ / 2^8)
+*/
 float Fixed::toFloat(void) const
 {
-    return (static_cast<float>(value_) / static_cast<float>(1 << fbits_));
-
-    // int shift = value_<<0x08;
-    // float res = static_cast<float>(shift);
+    // return ((float)value_ / (1 << fbits_));
+    int divisor = (1<<fbits_);
+    /*
+        fbits_=8;
+        divisor = 0000 0000 0000 0001 << 8;
+        divisor = 0000 0001 0000 0000;
+    */
+    float inverse_divisor = 1.0f / static_cast<float>(divisor);
+    /*
+        inverse_divisor = 1.0000 / 256.0000
+        inverse_divisor = 0.00390625;
+    */
+    float result = static_cast<float>(value_) * inverse_divisor;
+    return (result);
 }
-
-// 0x00 0x00 0x00 0x00
 
 int Fixed::toInt(void) const
 {
-    return (value_ >> fbits_); //value/2^8
-}
-
-//unique_ptr<> cannnot be assigned.
-//if you want to move the ownership, use move(unique_ptr);
-//the previous ptr gets nullptr.
-
-//shared_ptr<> can share the ownership.
-//shPtr.use_count() gets the count of the current oweners.
-
-//weak_ptr<> won't have the ownership of shared_ptr, but it can refer to it.
-//the count of shared_ptr won't increase.
-
-/*
-scope limitation
-{
-}
-has the effect to limit the life-time of pointer.
-*/
-
-Fixed &Fixed::operator=(Fixed const &other)
-{
-    std::cout <<"Copy assignment operator called" << std::endl;
-    value_=other.getRawBits();
-    return (*this);
-}
-
-bool Fixed::operator>(const Fixed &other) const
-{
-    if (value_>other.value_)
-        return (true);
-    return (false);
-}
-
-bool Fixed::operator<(const Fixed &other) const
-{
-    if (value_<other.value_)
-        return (true);
-    return (false);
-}
-
-bool Fixed::operator>=(const Fixed &other) const
-{
-    if (value_>=other.value_)
-        return (true);
-    return (false);
-}
-
-bool Fixed::operator<=(const Fixed &other) const
-{
-    if (value_>=other.value_)
-        return (true);
-    return (false);
-}
-
-bool Fixed::operator==(const Fixed &other) const
-{
-    if (value_==other.value_)
-        return (true);
-    return (false);
-}
-
-bool Fixed::operator!=(const Fixed &other) const
-{
-    if (value_>=other.value_)
-        return (true);
-    return (false);
-}
-
-Fixed   &Fixed::operator+(const Fixed &other) const
-{
-    Fixed res;
-    res.value_ = value_ + other.value_;
-    return (res);
-}
-
-Fixed   &Fixed::operator-(const Fixed &other) const
-{
-    Fixed res;
-    res.value_ = value_ - other.value_;
-    return (res);
-}
-
-Fixed   &Fixed::operator*(const Fixed &other) const
-{
-    Fixed res;
-    res.value_ = value_ * other.value_;
-    return (res);
-}
-
-Fixed   &Fixed::operator/(const Fixed &other) const
-{
-    Fixed res;
-    res.value_ = value_ / other.value_;
-    return (res);
-}
-
-//postfix increment
-Fixed   Fixed::operator++(int)
-{
-    Fixed tmp(*this);
-    value_+=(1<<fbits_);
-    return (tmp);
-}
-
-Fixed   Fixed::operator--(int)
-{
-    Fixed tmp(*this);
-    value_-+(1<<fbits_);
-    return (tmp);
-}
-
-//prefix increment
-Fixed   &Fixed::operator++(void)
-{
-    std::cerr <<"++ operator called: before:" << value_;
-    value_+=(1<<fbits_);
-    std::cerr <<"++ operator called: after:" <<  value_;
-    return (*this);
-}
-
-Fixed   &Fixed::operator--(void)
-{
-    std::cerr <<"-- operator called: before:" << value_;
-    value_-=(1<<fbits_);
-    std::cerr <<"-- operator called: before:" << value_;
-    return (*this);
+    return (value_ >> fbits_);
 }
 
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed)
 {
-    int value_local = fixed.getRawBits();
-    int fractional_mask = 0x0008;//32bit:0x0008
-    int fractional_part = value_local & fractional_mask;
-    int integer_part = fixed.toInt();
-    std::string buf;
-    buf = std::to_string(integer_part) + "." + std::to_string(fractional_part);
-    os << buf;
+    os << fixed.toFloat();
     return (os);
 }
 
-static Fixed const &min(Fixed const &f1, Fixed const &f2)
-{
-    if (f1>f2)
-        return (f2);
-    return (f1);
-}
+// bool Fixed::operator>(const Fixed &other) const
+// {
+//     if (value_>other.value_)
+//         return (true);
+//     return (false);
+// }
 
-static Fixed const &max(Fixed const &f1, Fixed const &f2)
-{
-    if (f1>f2)
-        return (f1);
-    return (f2);
-}
+// bool Fixed::operator<(const Fixed &other) const
+// {
+//     if (value_<other.value_)
+//         return (true);
+//     return (false);
+// }
+
+// bool Fixed::operator>=(const Fixed &other) const
+// {
+//     if (value_>=other.value_)
+//         return (true);
+//     return (false);
+// }
+
+// bool Fixed::operator<=(const Fixed &other) const
+// {
+//     if (value_>=other.value_)
+//         return (true);
+//     return (false);
+// }
+
+// bool Fixed::operator==(const Fixed &other) const
+// {
+//     if (value_==other.value_)
+//         return (true);
+//     return (false);
+// }
+
+// bool Fixed::operator!=(const Fixed &other) const
+// {
+//     if (value_>=other.value_)
+//         return (true);
+//     return (false);
+// }
+
+// Fixed   &Fixed::operator+(const Fixed &other) const
+// {
+//     Fixed res;
+//     res.value_ = value_ + other.value_;
+//     return (res);
+// }
+
+// Fixed   &Fixed::operator-(const Fixed &other) const
+// {
+//     Fixed res;
+//     res.value_ = value_ - other.value_;
+//     return (res);
+// }
+
+// Fixed   &Fixed::operator*(const Fixed &other) const
+// {
+//     Fixed res;
+//     res.value_ = value_ * other.value_;
+//     return (res);
+// }
+
+// Fixed   &Fixed::operator/(const Fixed &other) const
+// {
+//     Fixed res;
+//     res.value_ = value_ / other.value_;
+//     return (res);
+// }
+
+// //postfix increment
+// Fixed   Fixed::operator++(int)
+// {
+//     Fixed tmp(*this);
+//     value_+=(1<<fbits_);
+//     return (tmp);
+// }
+
+// Fixed   Fixed::operator--(int)
+// {
+//     Fixed tmp(*this);
+//     value_-+(1<<fbits_);
+//     return (tmp);
+// }
+
+// //prefix increment
+// Fixed   &Fixed::operator++(void)
+// {
+//     std::cerr <<"++ operator called: before:" << value_;
+//     value_+=(1<<fbits_);
+//     std::cerr <<"++ operator called: after:" <<  value_;
+//     return (*this);
+// }
+
+// Fixed   &Fixed::operator--(void)
+// {
+//     std::cerr <<"-- operator called: before:" << value_;
+//     value_-=(1<<fbits_);
+//     std::cerr <<"-- operator called: before:" << value_;
+//     return (*this);
+// }
+
+// static Fixed const &min(Fixed const &f1, Fixed const &f2)
+// {
+//     if (f1>f2)
+//         return (f2);
+//     return (f1);
+// }
+
+// static Fixed const &max(Fixed const &f1, Fixed const &f2)
+// {
+//     if (f1>f2)
+//         return (f1);
+//     return (f2);
+// }
