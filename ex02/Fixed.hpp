@@ -50,8 +50,11 @@ bool add(int value1, int value2, int negative_limit, int positive_limit);
 bool subtract(int value1, int value2, int negative_limit, int positive_limit);
 bool multi(int value1, int value2, int negative_limit, int positive_limit);
 bool devide(int value1, int value2, int negative_limit, int positive_limit);
+bool prefix_increment(int value1, int value2, int negative_limit, int positive_limit);
+bool postfix_increment(int value1, int value2, int negative_limit, int positive_limit);
+bool prefix_decrement(int value1, int value2, int negative_limit, int positive_limit);
+bool postfix_decrement(int value1, int value2, int negative_limit, int positive_limit);
 
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed);
-
 
 #endif

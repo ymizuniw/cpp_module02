@@ -159,7 +159,7 @@ Fixed   &Fixed::operator+(const Fixed &other) const
     int value1 = value_;
     int value2 = other.value_;
     overflow_check = add;
-    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
     res.value_ = value_ + other.value_;
     return (res);
@@ -172,7 +172,7 @@ Fixed   &Fixed::operator-(const Fixed &other) const
     int value2 = other.value_;
 
     overflow_check = subtract;
-    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
     res.value_ = value_ - other.value_;
     return (res);
@@ -185,7 +185,7 @@ Fixed   &Fixed::operator*(const Fixed &other) const
     int value2 = other.value_;
 
     overflow_check = multi;
-    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
     res.value_ = value_ * other.value_;
     return (res);
@@ -198,8 +198,24 @@ Fixed   &Fixed::operator/(const Fixed &other) const
     int value2 = other.value_;
 
     overflow_check = devide;
-    if (overflow_check(value1, value2, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
+    if (other.value_==0)
+    {
+        if (value_==0)
+        {
+            std::cerr << "0/0 occurred!" << std::endl;
+            res.value_ = 0;
+            return (res);
+        }
+        int sign = value_ > 0 ? 1 : 0;
+        switch (sign)
+        {
+            case 1: res.value_ = FIXED_OFLIMIT; break;
+            case 0: res.value_ = FIXED_UFLIMIT; break;
+        }
+        return (res);
+    }
     res.value_ = value_ / other.value_;
     return (res);
 }
@@ -208,6 +224,9 @@ Fixed   &Fixed::operator/(const Fixed &other) const
 Fixed   Fixed::operator++(int)
 {
     Fixed tmp(*this);
+    overflow_check = postfix_increment;
+    if (overflow_check(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
     value_ += 0b01;//or +=1
     return (tmp);
 }
@@ -216,6 +235,9 @@ Fixed   Fixed::operator++(int)
 Fixed   Fixed::operator--(int)
 {
     Fixed tmp(*this);
+    overflow_check = postfix_decrement;
+    if (overflow_check(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
     value_ -= 0b01;//or -=1
     return (tmp);
 }
@@ -224,29 +246,35 @@ Fixed   Fixed::operator--(int)
 Fixed   &Fixed::operator++(void)
 {
     // std::cerr <<"++ operator called: before:" << value_;
+    overflow_check = prefix_increment;
+    if (overflow_check(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
     value_+=(1<<fbits_);
     // std::cerr <<"++ operator called: after:" <<  value_;
     return (*this);
 }
 
-// Fixed   &Fixed::operator--(void)
-// {
-//     std::cerr <<"-- operator called: before:" << value_;
-//     value_-=(1<<fbits_);
-//     std::cerr <<"-- operator called: before:" << value_;
-//     return (*this);
-// }
+Fixed   &Fixed::operator--(void)
+{
+    // std::cerr <<"-- operator called: before:" << value_;
+    overflow_check = prefix_decrement;
+    if (overflow_check(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    value_-=(1<<fbits_);
+    // std::cerr <<"-- operator called: before:" << value_;
+    return (*this);
+}
 
-// static Fixed const &min(Fixed const &f1, Fixed const &f2)
-// {
-//     if (f1>f2)
-//         return (f2);
-//     return (f1);
-// }
+static Fixed const &min(Fixed const &f1, Fixed const &f2)
+{
+    if (f1>f2)
+        return (f2);
+    return (f1);
+}
 
-// static Fixed const &max(Fixed const &f1, Fixed const &f2)
-// {
-//     if (f1>f2)
-//         return (f1);
-//     return (f2);
-// }
+static Fixed const &max(Fixed const &f1, Fixed const &f2)
+{
+    if (f1>f2)
+        return (f1);
+    return (f2);
+}

@@ -144,7 +144,6 @@ bool prefix_increment(int value1, int value2, int negative_limit, int positive_l
     return (false);
 }
 
-
 bool postfix_increment(int value1, int value2, int negative_limit, int positive_limit)
 {
     if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
