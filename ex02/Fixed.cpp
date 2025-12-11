@@ -60,7 +60,7 @@ Fixed::Fixed(const int value) : value_(0)
         std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
         return ;
     }
-    value_ = value_ * (1<<fbits_);
+    value_ = value * (1<<fbits_);
     print_msg("Fixed::int value constructor called");
 }
 
