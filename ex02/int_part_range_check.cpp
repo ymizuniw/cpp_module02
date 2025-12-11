@@ -1,16 +1,16 @@
+#include <int_part_range_check.hpp>
 #include <iostream>
-#include <limits>
 
-bool add(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_add(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
     if (value1>0 && value2>0)
     {
-        if (value1 > positive_limit - value2)
+        if (value1 > INT_PART_OFLIMIT - value2)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -18,7 +18,7 @@ bool add(int value1, int value2, int negative_limit, int positive_limit)
     }
     else if (value1 < 0 && value2 <0)
     {
-        if (value1 < negative_limit - value2)
+        if (value1 < INT_PART_UFLIMIT - value2)
         {
             std::cerr << "underflow: " << std::endl;
             return (true);
@@ -27,16 +27,16 @@ bool add(int value1, int value2, int negative_limit, int positive_limit)
     return (false);
 }
 
-bool subtract(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_subtract(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
    if (value1 < 0 && value2 > 0)
    {
-        if (value1  < negative_limit + value2)
+        if (value1  < INT_PART_UFLIMIT + value2)
         {
             std::cerr << "underflow: " << std::endl;
             return (true);
@@ -44,7 +44,7 @@ bool subtract(int value1, int value2, int negative_limit, int positive_limit)
    }
    else if (value1 > 0 && value2 < 0)
    {
-        if (value1  > positive_limit + value2)
+        if (value1  > INT_PART_OFLIMIT + value2)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -53,7 +53,7 @@ bool subtract(int value1, int value2, int negative_limit, int positive_limit)
     return (false);
 }
 
-bool multi(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_multi(int value1, int value2)
 {
     uint64_t    n;
     uint64_t    v1;
@@ -61,7 +61,7 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
     int         sign1=1;
     int         sign2=1;
 
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
@@ -75,7 +75,7 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
         v1 = value1;
         v2 = value2;
         n = v1 * v2;
-        if (n>positive_limit)
+        if (n>INT_PART_OFLIMIT)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -86,7 +86,7 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
         v1 = value1;
         v2 = -value2;
         n = v1 * v2;
-        if (n>positive_limit)
+        if (n>INT_PART_OFLIMIT)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -97,7 +97,7 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
         v1 = -value1;
         v2 = value2;
         n = v1 * v2;
-        if (n>positive_limit)
+        if (n>INT_PART_OFLIMIT)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -108,7 +108,7 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
         v1 = -value1;
         v2 = -value2;
         n = v1 * v2;
-        if (n>positive_limit)
+        if (n>INT_PART_OFLIMIT)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -117,9 +117,9 @@ bool multi(int value1, int value2, int negative_limit, int positive_limit)
     return false;
 }
 
-bool devide(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_devide(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
@@ -127,16 +127,14 @@ bool devide(int value1, int value2, int negative_limit, int positive_limit)
     return false;
 }
 
-bool prefix_increment(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_prefix_increment(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
-    (void)value2;
-    (void)negative_limit;
-    if (value1 + 1>positive_limit)
+    if (value1 + 1>INT_PART_OFLIMIT)
     {
         std::cerr << "overflow: " << std::endl;
         return (true);
@@ -144,17 +142,15 @@ bool prefix_increment(int value1, int value2, int negative_limit, int positive_l
     return (false);
 }
 
-bool postfix_increment(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_postfix_increment(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
-    (void)value2;
-    (void)negative_limit;
     
-    if (value1 + 1>positive_limit)
+    if (value1 + 1>INT_PART_OFLIMIT)
     {
         std::cerr << "overflow: " << std::endl;
         return (true);
@@ -162,16 +158,14 @@ bool postfix_increment(int value1, int value2, int negative_limit, int positive_
     return (false);
 }
 
-bool prefix_decrement(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_prefix_decrement(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
-    (void)value2;
-    (void)positive_limit;
-    if (value1 - 1 < negative_limit)
+    if (value1 - 1 < INT_PART_UFLIMIT)
     {
         std::cerr << "underflow: " << std::endl;
         return (true);
@@ -179,16 +173,14 @@ bool prefix_decrement(int value1, int value2, int negative_limit, int positive_l
     return (false);
 }
 
-bool postfix_decrement(int value1, int value2, int negative_limit, int positive_limit)
+bool int_part_postfix_decrement(int value1, int value2)
 {
-    if (value1 < negative_limit || value1 > positive_limit || value2 < negative_limit || value2 > positive_limit)
+    if (value1 < INT_PART_UFLIMIT || value1 > INT_PART_OFLIMIT || value2 < INT_PART_UFLIMIT || value2 > INT_PART_OFLIMIT)
     {
         std::cerr << "given value includes out of range +-2^23-1 of Fixed class." << std::endl;
         return (true);
     }
-    (void)value2;
-    (void)positive_limit;
-    if (value1 - 1 < negative_limit)
+    if (value1 - 1 < INT_PART_UFLIMIT)
     {
         std::cerr << "underflow: " << std::endl;
         return (true);

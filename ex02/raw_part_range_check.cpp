@@ -1,10 +1,8 @@
 #include <iostream>
-#include <limits>
 
-bool (*raw_overflow)(int value1, int value2);
-// 549,755,813,888 INT_MAX * 256
+// 549,755,813,888 INT_MAX * (1<<fbits)
 // 9,223,372,036,854,775,808 2 ^ 63 uint64_t
-bool add(int value1, int value2)
+bool raw_part_add(int value1, int value2, int fbits)
 {
     if (value1>0 && value2>0)
     {
@@ -25,7 +23,7 @@ bool add(int value1, int value2)
     return (false);
 }
 
-bool subtract(int value1, int value2)
+bool raw_part_subtract(int value1, int value2, int fbits)
 {
    if (value2 > 0)
    {
@@ -46,14 +44,15 @@ bool subtract(int value1, int value2)
     return (false);
 }
 
-bool multi(int value1, int value2)
+bool raw_part_multi(int value1, int value2, int fbits)
 {
     uint64_t    n;
     uint64_t    v1;
     uint64_t    v2;
+    uint64_t    int_max = static_cast<uint64_t>(INT_MAX);
     int         sign1=1;
     int         sign2=1;
-
+    
     if (value1<0)
         sign1 = 0;
     if (value2<0)
@@ -63,7 +62,7 @@ bool multi(int value1, int value2)
         v1 = value1;
         v2 = value2;
         n = v1 * v2;
-        if (n/256>INT_MAX)
+        if (n/(1<<fbits)>int_max)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -74,7 +73,7 @@ bool multi(int value1, int value2)
         v1 = value1;
         v2 = static_cast<uint64_t>(-static_cast<int64_t>(value2));
         n = v1 * v2;
-        if (n/256>INT_MAX+1)
+        if (n/(1<<fbits)> int_max +1)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -85,7 +84,7 @@ bool multi(int value1, int value2)
         v1 = static_cast<uint64_t>(-static_cast<int64_t>(value1));
         v2 = value2;
         n = v1 * v2;
-        if (n/256>INT_MAX+1)
+        if (n/(1<<fbits)> int_max +1)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -96,7 +95,7 @@ bool multi(int value1, int value2)
         v1 = static_cast<uint64_t>(-static_cast<int64_t>(value1));
         v2 = static_cast<uint64_t>(-static_cast<int64_t>(value2));
         n = v1 * v2;
-        if (n/256>INT_MAX)
+        if (n/(1<<fbits)>int_max)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -105,12 +104,12 @@ bool multi(int value1, int value2)
     return false;
 }
 
-bool devide(int value1, int value2, int fbits)
+bool raw_part_devide(int value1, int value2, int fbits)
 {
     return false;
 }
 
-bool prefix_increment(int value1, int value2)
+bool raw_part_prefix_increment(int value1, int value2, int fbits)
 {
     (void)value2;
     if (value1 + 1>INT_MAX)
@@ -121,7 +120,7 @@ bool prefix_increment(int value1, int value2)
     return (false);
 }
 
-bool postfix_increment(int value1, int value2)
+bool raw_part_postfix_increment(int value1, int value2, int fbits)
 {
     (void)value2;
     if (value1 + 1>INT_MAX)
@@ -132,7 +131,7 @@ bool postfix_increment(int value1, int value2)
     return (false);
 }
 
-bool prefix_decrement(int value1, int value2)
+bool raw_part_prefix_decrement(int value1, int value2, int fbits)
 {
     (void)value2;
     if (value1 - 1 < INT_MIN)
@@ -143,7 +142,7 @@ bool prefix_decrement(int value1, int value2)
     return (false);
 }
 
-bool postfix_decrement(int value1, int value2)
+bool raw_part_postfix_decrement(int value1, int value2, int fbits)
 {
     (void)value2;
     if (value1 - 1 < INT_MIN)

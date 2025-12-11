@@ -2,10 +2,6 @@
 #define FIXED_HPP
 
 #include <iostream>
-#include <cmath>
-#include <limits>
-#include <fixed_overflow.hpp>
-#include <raw_overflow.hpp>
 
 //static member is unique, and all object has it in common.
 class Fixed

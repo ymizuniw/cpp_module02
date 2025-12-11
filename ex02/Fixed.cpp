@@ -1,4 +1,7 @@
 #include "Fixed.hpp"
+#include <cmath>
+#include <int_part_range_check.hpp>
+#include <raw_part_range_check.hpp>
 
 void print_msg(std::string msg)
 {
@@ -50,14 +53,14 @@ void    Fixed::setRawBits(int const raw)
 
 Fixed::Fixed(const int value) : value_(0)
 {
-    if (value > FIXED_OFLIMIT)
+    if (value > INT_PART_OFLIMIT)
     {
-        std::cerr << "recept int value overflows. out of Fixed int range" << std::endl;
+        std::cerr << "int part overflow." << std::endl;
         return ;
     }
-    else if (value < FIXED_UFLIMIT)
+    else if (value < INT_PART_UFLIMIT)
     {
-        std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
+        std::cerr << "int part underflow." << std::endl;
         return ;
     }
     value_ = value * (1<<fbits_);
@@ -68,14 +71,34 @@ Fixed::Fixed(const int value) : value_(0)
 Fixed::Fixed(const float value)
 {
     print_msg("Fixed::float value constructor called");
-        if (value > FIXED_OFLIMIT)
-        std::cerr << "recept int value overflows. out of Fixed int range" << std::endl;
-    else if (value < FIXED_UFLIMIT)
-        std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
+    if (static_cast<double>(value)  > static_cast<double>(INT_PART_OFLIMIT))
+    {
+        std::cerr << "intpart overflow." << std::endl;
+        value_ = 0;
+        return ;
+    }
+    else if (static_cast<double>(value) < static_cast<double>(INT_PART_UFLIMIT))
+    {
+        std::cerr << "intpart underflow." << std::endl;
+        value_ = 0;
+        return ;
+    }
+    if (static_cast<double>(value) * (1<<fbits_)> static_cast<double>(INT_MAX))
+    {
+        std::cerr << "raw part overflow." << std::endl;
+        value_ = 0;
+        return ;
+    }
+    else if (static_cast<double>(value) * (1<<fbits_) < static_cast<double>(INT_MIN))
+    {
+        std::cerr << "raw part underflow." << std::endl;
+        value_ = 0;
+        return ;
+    }
     float shift = value * (1<<fbits_);
     float round = roundf(shift);
     int    cast = static_cast<int>(round);
-    std::cout << "Fixed::assignment constructor: float casted to " << cast << std::endl;
+    // std::cout << "Fixed::assignment constructor: float casted to " << cast << std::endl;
     value_ = cast;
 }
 
@@ -159,12 +182,18 @@ Fixed   Fixed::operator+(const Fixed &other) const
 {
     Fixed res;
 
-    fixed_overflow = add;
-    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = add;
-    if (raw_overflow(value_, other.value_))
-        ;
+    check_range_t check_range = int_part_add;
+    if (check_range(value_/(1<<fbits_), other.value_/(1<<fbits_)))
+    {
+        res.value_ = 0;
+        return(res);
+    }
+    check_raw_range_t check_raw_range = raw_part_add;
+    if (check_raw_range(value_, other.value_, fbits_))
+    {
+        res.value_ = 0;
+        return(res);
+    }
     res.value_ = value_ + other.value_;
     return (res);
 }
@@ -172,15 +201,19 @@ Fixed   Fixed::operator+(const Fixed &other) const
 Fixed   Fixed::operator-(const Fixed &other) const
 {
     Fixed res;
-    int value1 = value_;
-    int value2 = other.value_;
 
-    fixed_overflow = subtract;
-    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = subtract;
-    if (raw_overflow(value_, other.value_))
-        ;
+    check_range_t check_range = int_part_subtract;
+    if (check_range(value_/(1<<fbits_), other.value_/(1<<fbits_)))
+    {
+        res.value_ = 0;
+        return(res);
+    }
+    check_raw_range_t check_raw_range = raw_part_subtract;
+    if (check_raw_range(value_, other.value_, fbits_))
+    {
+        res.value_ = 0;
+        return(res);
+    }
     res.value_ = value_ - other.value_;
     return (res);
 }
@@ -192,20 +225,22 @@ Fixed   Fixed::operator-(const Fixed &other) const
 //     CLEAN
 // } t_range;
 
-// t_range check_range(int value1, int value2);
-
 Fixed   Fixed::operator*(const Fixed &other) const
 {
     Fixed       res;
 
-    fixed_overflow = multi;
-    //int part overflow check.
-    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    //raw part overflow check.
-    raw_overflow = multi;
-    if (raw_overflow(value_, other.value_))
-        ;
+    check_range_t check_range = int_part_multi;
+    if (check_range(value_/(1<<fbits_), other.value_/(1<<fbits_)))
+    {
+        res.value_ = 0;
+        return(res);
+    }
+    check_raw_range_t check_raw_range = raw_part_multi;
+    if (check_raw_range(value_, other.value_, fbits_))
+    {
+        res.value_ = 0;
+        return(res);
+    }
     res.value_ = (value_ * other.value_)>>fbits_;
     return (res);
 }
@@ -225,17 +260,23 @@ Fixed   Fixed::operator/(const Fixed &other) const
         int sign = value_ > 0 ? 1 : 0;
         switch (sign)
         {
-            case 1: res.value_ = FIXED_OFLIMIT; break;
-            case 0: res.value_ = FIXED_UFLIMIT; break;
+            case 1: res.value_ = (INT_PART_OFLIMIT - 1)* (1<<fbits_); break;
+            case 0: res.value_ = INT_PART_UFLIMIT * (1<<fbits_); break;
         }
         return (res);
     }
-    fixed_overflow = devide;
-    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = devide;
-    if (raw_overflow(value_, other.value_))
-        ;
+    check_range_t check_range = int_part_devide;
+    if (check_range(value_/(1<<fbits_), other.value_/(1<<fbits_)))
+    {
+        res.value_ = 0;
+        return(res);
+    }
+    check_raw_range_t check_raw_range = raw_part_devide;
+    if (check_raw_range(value_, other.value_, fbits_))
+    {
+        res.value_ = 0;
+        return(res);
+    }
     int64_t v1 = static_cast<int64_t>(value_) * (1<<fbits_);
     int64_t v2 = other.value_;
     int64_t n = v1/v2;
@@ -243,63 +284,79 @@ Fixed   Fixed::operator/(const Fixed &other) const
     return (res);
 }
 
-//overflow check lacks.
 Fixed   Fixed::operator++(int)
 {
     Fixed tmp(*this);
-    fixed_overflow = postfix_increment;
-    if (fixed_overflow(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = postfix_increment;
-    if (raw_overflow(value_, 0))
-        ;
+    check_range_t check_range = int_part_postfix_increment;
+    if (check_range(tmp.value_/(1<<fbits_), 0))
+    {
+        tmp.value_ = 0;
+        return(tmp);
+    }
+    check_raw_range_t check_raw_range = raw_part_postfix_increment;
+    if (check_raw_range(value_, 0, fbits_ ))
+    {
+        tmp.value_ = 0;
+        return(tmp);
+    }
     value_ += 1;
     return (tmp);
 }
 
-//underflow check lacks.
 Fixed   Fixed::operator--(int)
 {
     Fixed tmp(*this);
-    fixed_overflow = postfix_decrement;
-    if (fixed_overflow(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = postfix_decrement;
-    if (raw_overflow(value_, 0))
-        ;
-    value_ -= 1;//or -=1
+    check_range_t check_range = int_part_postfix_decrement;
+    if (check_range(tmp.value_/(1<<fbits_), 0))
+    {
+        tmp.value_ = 0;
+        return(tmp);
+    }
+    check_raw_range_t check_raw_range = raw_part_postfix_decrement;
+    if (check_raw_range(value_, 0 , fbits_))
+    {
+        tmp.value_ = 0;
+        return(tmp);
+    }
+    value_ -= 1;
     return (tmp);
 }
 
-// //prefix increment
 Fixed   &Fixed::operator++(void)
 {
-    // std::cerr <<"++ operator called: before:" << value_;
-    fixed_overflow = prefix_increment;
-    if (fixed_overflow(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = prefix_increment;
-    if (raw_overflow(value_, 0))
-        ;
-    value_+=1;
-    // std::cerr <<"++ operator called: after:" <<  value_;
+    check_range_t check_range = int_part_prefix_increment;
+    if (check_range(value_/(1<<fbits_), 0))
+    {
+        value_ = 0;
+        return (*this);
+    }
+    check_raw_range_t check_raw_range = raw_part_prefix_increment;
+    if (check_raw_range(value_, 0, fbits_))
+        value_ = 0;
+    else
+        value_+=1;
     return (*this);
 }
 
 Fixed   &Fixed::operator--(void)
 {
-    // std::cerr <<"-- operator called: before:" << value_;
-    fixed_overflow = prefix_decrement;
-    if (fixed_overflow(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
-    raw_overflow = prefix_decrement;
-    if (raw_overflow(value_, 0))
-        ;
+    check_range_t check_range = int_part_prefix_decrement;
+    if (check_range(value_/(1<<fbits_), 0))
+    {
+        value_ = 0;
+        return (*this);
+    }
+    check_raw_range_t check_raw_range = raw_part_prefix_decrement;
+    if (check_raw_range(value_, 0  , fbits_))
+    {
+     value_ = 0;
+        return (*this);
+    }
     value_-=1;
-    // std::cerr <<"-- operator called: before:" << value_;
     return (*this);
 }
 
+//if equal, return left operand
 Fixed const &Fixed::min(Fixed const &f1, Fixed const &f2)
 {
     if (f1>f2)
@@ -307,6 +364,7 @@ Fixed const &Fixed::min(Fixed const &f1, Fixed const &f2)
     return (f1);
 }
 
+//if equal, return left operand
 Fixed const &Fixed::max(Fixed const &f1, Fixed const &f2)
 {
     if (f1>f2)
