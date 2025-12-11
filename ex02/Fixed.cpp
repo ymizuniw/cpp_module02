@@ -47,7 +47,7 @@ void    Fixed::setRawBits(int const raw)
     then value_ = 3.1415 * 2^8
 */
 /*
-    +8,388,608
+    +8,388,607
     -8,388,608
 */
 
@@ -260,7 +260,7 @@ Fixed   Fixed::operator/(const Fixed &other) const
         int sign = value_ > 0 ? 1 : 0;
         switch (sign)
         {
-            case 1: res.value_ = (INT_PART_OFLIMIT - 1)* (1<<fbits_); break;
+            case 1: res.value_ = INT_PART_OFLIMIT* (1<<fbits_); break;
             case 0: res.value_ = INT_PART_UFLIMIT * (1<<fbits_); break;
         }
         return (res);

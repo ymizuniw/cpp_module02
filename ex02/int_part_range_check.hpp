@@ -7,7 +7,7 @@
 typedef bool    (*check_range_t)(int value1, int value2);
 
 #define INT_PART_UFLIMIT -8388608
-#define INT_PART_OFLIMIT 8388608
+#define INT_PART_OFLIMIT 8388607
 
 bool int_part_add(int value1, int value2);
 bool int_part_subtract(int value1, int value2);
