@@ -105,7 +105,7 @@ bool multi(int value1, int value2)
     return false;
 }
 
-bool devide(int value1, int value2)
+bool devide(int value1, int value2, int fbits)
 {
     return false;
 }

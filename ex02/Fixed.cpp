@@ -51,10 +51,16 @@ void    Fixed::setRawBits(int const raw)
 Fixed::Fixed(const int value) : value_(0)
 {
     if (value > FIXED_OFLIMIT)
+    {
         std::cerr << "recept int value overflows. out of Fixed int range" << std::endl;
+        return ;
+    }
     else if (value < FIXED_UFLIMIT)
+    {
         std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
-    value_ = (value<<fbits_);
+        return ;
+    }
+    value_ = value_ * (1<<fbits_);
     print_msg("Fixed::int value constructor called");
 }
 
@@ -179,6 +185,15 @@ Fixed   Fixed::operator-(const Fixed &other) const
     return (res);
 }
 
+// typedef enum e_range
+// {
+//     UNDER_FLOW,
+//     OVER_FLOW,
+//     CLEAN
+// } t_range;
+
+// t_range check_range(int value1, int value2);
+
 Fixed   Fixed::operator*(const Fixed &other) const
 {
     Fixed       res;
@@ -221,7 +236,10 @@ Fixed   Fixed::operator/(const Fixed &other) const
     raw_overflow = devide;
     if (raw_overflow(value_, other.value_))
         ;
-    res.value_ = (value_ / other.value_)<<fbits_;//lose?
+    int64_t v1 = static_cast<int64_t>(value_) * (1<<fbits_);
+    int64_t v2 = other.value_;
+    int64_t n = v1/v2;
+    res.value_ = static_cast<int>(n);
     return (res);
 }
 
@@ -235,7 +253,7 @@ Fixed   Fixed::operator++(int)
     raw_overflow = postfix_increment;
     if (raw_overflow(value_, 0))
         ;
-    value_ += 1;//or +=1
+    value_ += 1;
     return (tmp);
 }
 
