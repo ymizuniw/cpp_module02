@@ -2,7 +2,8 @@
 #include <limits>
 
 bool (*raw_overflow)(int value1, int value2);
-
+// 549,755,813,888 INT_MAX * 256
+// 9,223,372,036,854,775,808 2 ^ 63 uint64_t
 bool add(int value1, int value2)
 {
     if (value1>0 && value2>0)
@@ -62,7 +63,7 @@ bool multi(int value1, int value2)
         v1 = value1;
         v2 = value2;
         n = v1 * v2;
-        if (n>INT_MAX)
+        if (n/256>INT_MAX)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);
@@ -73,7 +74,7 @@ bool multi(int value1, int value2)
         v1 = value1;
         v2 = static_cast<uint64_t>(-static_cast<int64_t>(value2));
         n = v1 * v2;
-        if (n>INT_MAX+1)
+        if (n/256>INT_MAX+1)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -84,7 +85,7 @@ bool multi(int value1, int value2)
         v1 = static_cast<uint64_t>(-static_cast<int64_t>(value1));
         v2 = value2;
         n = v1 * v2;
-        if (n>INT_MAX+1)
+        if (n/256>INT_MAX+1)
         {
           std::cerr << "underflow: " << std::endl;
           return (true);  
@@ -95,7 +96,7 @@ bool multi(int value1, int value2)
         v1 = static_cast<uint64_t>(-static_cast<int64_t>(value1));
         v2 = static_cast<uint64_t>(-static_cast<int64_t>(value2));
         n = v1 * v2;
-        if (n>INT_MAX)
+        if (n/256>INT_MAX)
         {
             std::cerr << "overflow: " << std::endl;
             return (true);

@@ -182,25 +182,22 @@ Fixed   Fixed::operator-(const Fixed &other) const
 Fixed   Fixed::operator*(const Fixed &other) const
 {
     Fixed       res;
-    uint64_t    value1 = static_cast<uint64_t>(value_);
-    uint64_t    value2 = static_cast<uint64_t>(other.value_);
+
     fixed_overflow = multi;
     //int part overflow check.
-    if (fixed_overflow(value1>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
     //raw part overflow check.
     raw_overflow = multi;
     if (raw_overflow(value_, other.value_))
         ;
-    res.value_ = value1 * value2;
+    res.value_ = (value_ * other.value_)>>fbits_;
     return (res);
 }
 
 Fixed   Fixed::operator/(const Fixed &other) const
 {
     Fixed res;
-    int value1 = value_;
-    int value2 = other.value_;
 
     if (other.value_==0)
     {
@@ -224,7 +221,7 @@ Fixed   Fixed::operator/(const Fixed &other) const
     raw_overflow = devide;
     if (raw_overflow(value_, other.value_))
         ;
-    res.value_ = value_ / other.value_;
+    res.value_ = (value_ / other.value_)<<fbits_;//lose?
     return (res);
 }
 
