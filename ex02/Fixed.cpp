@@ -1,8 +1,4 @@
-
 #include "Fixed.hpp"
-
-#include "Fixed.hpp"
-#include <limits>
 
 void print_msg(std::string msg)
 {
@@ -52,12 +48,13 @@ void    Fixed::setRawBits(int const raw)
     -8,388,608
 */
 
-Fixed::Fixed(const int value) : value_(value<<fbits_)
+Fixed::Fixed(const int value) : value_(0)
 {
-    if (value>0x8000 - 0x0001)
-        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
-   else if (value < -(0x8000 - 0x0001))
-        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
+    if (value > FIXED_OFLIMIT)
+        std::cerr << "recept int value overflows. out of Fixed int range" << std::endl;
+    else if (value < FIXED_UFLIMIT)
+        std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
+    value_ = (value<<fbits_);
     print_msg("Fixed::int value constructor called");
 }
 
@@ -65,11 +62,10 @@ Fixed::Fixed(const int value) : value_(value<<fbits_)
 Fixed::Fixed(const float value)
 {
     print_msg("Fixed::float value constructor called");
-    if (value>static_cast<float>(0x8000 - 0x0001))
-        std::cerr << "recept float value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
-    else if (value < -static_cast<float>(0x8000 - 0x0001))
-        std::cerr << "recept int value overflows. Fixed can repareset -8,388,608~8,388,608" << std::endl;
-    //shift float
+        if (value > FIXED_OFLIMIT)
+        std::cerr << "recept int value overflows. out of Fixed int range" << std::endl;
+    else if (value < FIXED_UFLIMIT)
+        std::cerr << "recept int value underflows. out of Fixed int range" << std::endl;
     float shift = value * (1<<fbits_);
     float round = roundf(shift);
     int    cast = static_cast<int>(round);
@@ -133,7 +129,7 @@ bool Fixed::operator>=(const Fixed &other) const
 
 bool Fixed::operator<=(const Fixed &other) const
 {
-    if (value_>=other.value_)
+    if (value_<=other.value_)
         return (true);
     return (false);
 }
@@ -153,53 +149,59 @@ bool Fixed::operator!=(const Fixed &other) const
 }
 
 //8388608 threshold;
-Fixed   &Fixed::operator+(const Fixed &other) const
+Fixed   Fixed::operator+(const Fixed &other) const
 {
     Fixed res;
-    int value1 = value_;
-    int value2 = other.value_;
-    overflow_check = add;
-    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
+
+    fixed_overflow = add;
+    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
+    raw_overflow = add;
+    if (raw_overflow(value_, other.value_))
+        ;
     res.value_ = value_ + other.value_;
     return (res);
 }
 
-Fixed   &Fixed::operator-(const Fixed &other) const
+Fixed   Fixed::operator-(const Fixed &other) const
 {
     Fixed res;
     int value1 = value_;
     int value2 = other.value_;
 
-    overflow_check = subtract;
-    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    fixed_overflow = subtract;
+    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
+    raw_overflow = subtract;
+    if (raw_overflow(value_, other.value_))
+        ;
     res.value_ = value_ - other.value_;
     return (res);
 }
 
-Fixed   &Fixed::operator*(const Fixed &other) const
+Fixed   Fixed::operator*(const Fixed &other) const
 {
-    Fixed res;
-    int value1 = value_;
-    int value2 = other.value_;
-
-    overflow_check = multi;
-    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    Fixed       res;
+    uint64_t    value1 = static_cast<uint64_t>(value_);
+    uint64_t    value2 = static_cast<uint64_t>(other.value_);
+    fixed_overflow = multi;
+    //int part overflow check.
+    if (fixed_overflow(value1>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
-    res.value_ = value_ * other.value_;
+    //raw part overflow check.
+    raw_overflow = multi;
+    if (raw_overflow(value_, other.value_))
+        ;
+    res.value_ = value1 * value2;
     return (res);
 }
 
-Fixed   &Fixed::operator/(const Fixed &other) const
+Fixed   Fixed::operator/(const Fixed &other) const
 {
     Fixed res;
     int value1 = value_;
     int value2 = other.value_;
 
-    overflow_check = devide;
-    if (overflow_check(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
-        ;//handle if needed.
     if (other.value_==0)
     {
         if (value_==0)
@@ -216,6 +218,12 @@ Fixed   &Fixed::operator/(const Fixed &other) const
         }
         return (res);
     }
+    fixed_overflow = devide;
+    if (fixed_overflow(value_>>8, other.value_>>8, FIXED_UFLIMIT, FIXED_OFLIMIT))
+        ;//handle if needed.
+    raw_overflow = devide;
+    if (raw_overflow(value_, other.value_))
+        ;
     res.value_ = value_ / other.value_;
     return (res);
 }
@@ -224,10 +232,13 @@ Fixed   &Fixed::operator/(const Fixed &other) const
 Fixed   Fixed::operator++(int)
 {
     Fixed tmp(*this);
-    overflow_check = postfix_increment;
-    if (overflow_check(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    fixed_overflow = postfix_increment;
+    if (fixed_overflow(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
-    value_ += 0b01;//or +=1
+    raw_overflow = postfix_increment;
+    if (raw_overflow(value_, 0))
+        ;
+    value_ += 1;//or +=1
     return (tmp);
 }
 
@@ -235,10 +246,13 @@ Fixed   Fixed::operator++(int)
 Fixed   Fixed::operator--(int)
 {
     Fixed tmp(*this);
-    overflow_check = postfix_decrement;
-    if (overflow_check(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    fixed_overflow = postfix_decrement;
+    if (fixed_overflow(tmp.value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
-    value_ -= 0b01;//or -=1
+    raw_overflow = postfix_decrement;
+    if (raw_overflow(value_, 0))
+        ;
+    value_ -= 1;//or -=1
     return (tmp);
 }
 
@@ -246,10 +260,13 @@ Fixed   Fixed::operator--(int)
 Fixed   &Fixed::operator++(void)
 {
     // std::cerr <<"++ operator called: before:" << value_;
-    overflow_check = prefix_increment;
-    if (overflow_check(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    fixed_overflow = prefix_increment;
+    if (fixed_overflow(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
-    value_+=(1<<fbits_);
+    raw_overflow = prefix_increment;
+    if (raw_overflow(value_, 0))
+        ;
+    value_+=1;
     // std::cerr <<"++ operator called: after:" <<  value_;
     return (*this);
 }
@@ -257,22 +274,25 @@ Fixed   &Fixed::operator++(void)
 Fixed   &Fixed::operator--(void)
 {
     // std::cerr <<"-- operator called: before:" << value_;
-    overflow_check = prefix_decrement;
-    if (overflow_check(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
+    fixed_overflow = prefix_decrement;
+    if (fixed_overflow(value_>>8, 0, FIXED_UFLIMIT, FIXED_OFLIMIT))
         ;//handle if needed.
-    value_-=(1<<fbits_);
+    raw_overflow = prefix_decrement;
+    if (raw_overflow(value_, 0))
+        ;
+    value_-=1;
     // std::cerr <<"-- operator called: before:" << value_;
     return (*this);
 }
 
-static Fixed const &min(Fixed const &f1, Fixed const &f2)
+Fixed const &Fixed::min(Fixed const &f1, Fixed const &f2)
 {
     if (f1>f2)
         return (f2);
     return (f1);
 }
 
-static Fixed const &max(Fixed const &f1, Fixed const &f2)
+Fixed const &Fixed::max(Fixed const &f1, Fixed const &f2)
 {
     if (f1>f2)
         return (f1);

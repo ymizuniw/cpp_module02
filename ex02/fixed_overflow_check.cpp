@@ -18,7 +18,7 @@ bool add(int value1, int value2, int negative_limit, int positive_limit)
     }
     else if (value1 < 0 && value2 <0)
     {
-        if (value1 > negative_limit - value2)
+        if (value1 < negative_limit - value2)
         {
             std::cerr << "underflow: " << std::endl;
             return (true);
