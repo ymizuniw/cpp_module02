@@ -152,51 +152,6 @@ bool Fixed::operator!=(const Fixed &other) const
     return (false);
 }
 
-bool    (*overflow_check)(int value1, int value2, int negative_limit, int positive_limit);
-
-#define FIXED_UFLIMIT -8388608
-#define FIXED_OFLIMIT 8388608
-
-bool add(int value1, int value2, int negative_limit, int positive_limit)
-{
-    // + + +
-    if (value1>0 && value2>0)
-    {
-        if (value1 > positive_limit - value2)
-        {
-            std::cerr << "overflow: " << std::endl;
-            return (true);
-        }
-    }
-    else if (value1 < 0 && value2 <0)//uflow
-    {
-        if (value1 > negative_limit - value2)
-        {
-            std::cerr << "underflow: " << std::endl;
-            return (true);
-        }
-    }
-    return (false);
-    // //+ + -
-    // else if (value1 > 0 && value2 < 0)//ok. but for safety.
-    // //- + +
-}
-
-bool subtract(int value1, int value2, int negative_limit, int positive_limit)
-{
-    return false;
-}
-
-bool multi(int value1, int value2, int negative_limit, int positive_limit)
-{
-    return false;
-}
-
-bool devide(int value1, int value2, int negative_limit, int positive_limit)
-{
-    return false;
-}
-
 //8388608 threshold;
 Fixed   &Fixed::operator+(const Fixed &other) const
 {
@@ -254,7 +209,6 @@ Fixed   Fixed::operator++(int)
 {
     Fixed tmp(*this);
     value_ += 0b01;//or +=1
-    // value_+=(1<<fbits_);
     return (tmp);
 }
 
@@ -263,18 +217,17 @@ Fixed   Fixed::operator--(int)
 {
     Fixed tmp(*this);
     value_ -= 0b01;//or -=1
-    // value_-+(1<<fbits_);
     return (tmp);
 }
 
 // //prefix increment
-// Fixed   &Fixed::operator++(void)
-// {
-//     std::cerr <<"++ operator called: before:" << value_;
-//     value_+=(1<<fbits_);
-//     std::cerr <<"++ operator called: after:" <<  value_;
-//     return (*this);
-// }
+Fixed   &Fixed::operator++(void)
+{
+    // std::cerr <<"++ operator called: before:" << value_;
+    value_+=(1<<fbits_);
+    // std::cerr <<"++ operator called: after:" <<  value_;
+    return (*this);
+}
 
 // Fixed   &Fixed::operator--(void)
 // {

@@ -41,6 +41,17 @@ class Fixed
         static Fixed const &max(Fixed const &f1, Fixed const &f2);
 };
 
+bool    (*overflow_check)(int value1, int value2, int negative_limit, int positive_limit);
+
+#define FIXED_UFLIMIT -8388608
+#define FIXED_OFLIMIT 8388608
+
+bool add(int value1, int value2, int negative_limit, int positive_limit);
+bool subtract(int value1, int value2, int negative_limit, int positive_limit);
+bool multi(int value1, int value2, int negative_limit, int positive_limit);
+bool devide(int value1, int value2, int negative_limit, int positive_limit);
+
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed);
+
 
 #endif
