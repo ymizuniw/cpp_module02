@@ -1,7 +1,7 @@
 #ifndef RAW_OVERFLOW_HPP
 #define RAW_OVERFLOW_HPP
 
-typedef bool (*check_raw_range_t)(int value1, int value2, int fbits);
+typedef bool (*check_range_t)(int value1, int value2, int fbits);
 
 bool raw_part_add(int value1, int value2, int fbits);
 bool raw_part_subtract(int value1, int value2, int fbits);
