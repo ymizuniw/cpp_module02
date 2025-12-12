@@ -4,6 +4,7 @@
 // 9,223,372,036,854,775,808 2 ^ 63 uint64_t
 bool raw_part_add(int value1, int value2, int fbits)
 {
+    (void)fbits;
     if (value1>0 && value2>0)
     {
         if (value1 > INT_MAX - value2)
@@ -25,6 +26,7 @@ bool raw_part_add(int value1, int value2, int fbits)
 
 bool raw_part_subtract(int value1, int value2, int fbits)
 {
+    (void)fbits;
    if (value2 > 0)
    {
         if (value1  < INT_MIN + value2)
@@ -106,12 +108,16 @@ bool raw_part_multi(int value1, int value2, int fbits)
 
 bool raw_part_devide(int value1, int value2, int fbits)
 {
+    (void)value1;
+    (void)value2;
+    (void)fbits;
     return false;
 }
 
 bool raw_part_prefix_increment(int value1, int value2, int fbits)
 {
     (void)value2;
+    (void)fbits;
     if (value1 + 1>INT_MAX)
     {
         std::cerr << "overflow: " << std::endl;
@@ -123,6 +129,7 @@ bool raw_part_prefix_increment(int value1, int value2, int fbits)
 bool raw_part_postfix_increment(int value1, int value2, int fbits)
 {
     (void)value2;
+        (void)fbits;
     if (value1 + 1>INT_MAX)
     {
         std::cerr << "overflow: " << std::endl;
@@ -134,6 +141,7 @@ bool raw_part_postfix_increment(int value1, int value2, int fbits)
 bool raw_part_prefix_decrement(int value1, int value2, int fbits)
 {
     (void)value2;
+    (void)fbits;
     if (value1 - 1 < INT_MIN)
     {
         std::cerr << "underflow: " << std::endl;
@@ -145,6 +153,7 @@ bool raw_part_prefix_decrement(int value1, int value2, int fbits)
 bool raw_part_postfix_decrement(int value1, int value2, int fbits)
 {
     (void)value2;
+    (void)fbits;
     if (value1 - 1 < INT_MIN)
     {
         std::cerr << "underflow: " << std::endl;

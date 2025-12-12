@@ -8,7 +8,7 @@ class Fixed
 {
     private:
         int                    value_;
-        static constexpr int fbits_=8;
+        static const int fbits_=8;
     public:
         Fixed();
         Fixed(const Fixed &src); 
