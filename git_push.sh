@@ -8,7 +8,7 @@ read -r -p "commit message: " MSG
 git commit -m "${MSG}"
 read -r -p "push?[y/n]" PUSH
 if [ "$PUSH" == "y" ]; then
-    git push "${REMOTE} ${BRANCH}"
+    git push ${REMOTE} ${BRANCH}
 else
     exit 1
 fi
