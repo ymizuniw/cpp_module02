@@ -12,7 +12,7 @@ CPPFLAGS=-I.
 
 #test021 builder
 TEST1=test021
-MAIN1=main2.cpp
+MAIN1=main1.cpp
 TEST1_SRCS=$(SRCS) $(MAIN1)
 TEST1_OBJS=$(TEST1_SRCS:%.cpp=%.o)
 test01: $(TEST1)
@@ -21,7 +21,7 @@ $(TEST1): $(TEST1_OBJS)
 
 #test022 builder
 TEST2=test022
-MAIN2=main.cpp
+MAIN2=main2.cpp
 TEST2_SRCS=$(SRCS) $(MAIN2)
 TEST2_OBJS=$(TEST2_SRCS:%.cpp=%.o)
 test02: $(TEST2)

@@ -1,4 +1,5 @@
 #include <Fixed.hpp>
+#include <limits>
 
 int main(void) {
   Fixed a;
