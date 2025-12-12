@@ -1,7 +1,7 @@
 #common srcs
 SRCS=Fixed.cpp\
 	int_part_range_check.cpp\
-	raw_part_range_check.cpp
+	int_part_range_check.cpp
 #common compiler options
 CXX=c++
 CXXFLAGS=-std=c++98 -Wall -Wextra -Werror
