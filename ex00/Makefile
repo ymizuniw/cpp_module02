@@ -1,15 +1,15 @@
-NAME=test00
-SRCS=Fixed.cpp\
+NAME = test00
+SRCS = Fixed.cpp \
 main.cpp
-INCS=-I.
+INCS = -I.
 OBJS=$(SRCS:%.cpp=%.o)
 
-CPP=c++
-CFLAGS=-std=c++98 -Wall -Wextra -Werror
+CPP = c++
+CFLAGS = -std=c++98 -Wall -Wextra -Werror
 
 $(NAME): $(OBJS)
 	$(CPP) $(CFLAGS) -o $@ $(OBJS)
-%.o:	%.cpp
+%.o: %.cpp
 	$(CPP)	$(CFLAGS)	-c $< -o $@
 
 all: $(NAME)

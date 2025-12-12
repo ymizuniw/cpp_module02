@@ -4,7 +4,7 @@
 // #include <iostream>
 // #include <limits>
 
-typedef bool    (*check_range_t)(int value1, int value2);
+typedef bool (*check_range_t)(int value1, int value2);
 
 #define INT_PART_UFLIMIT -8388608
 #define INT_PART_OFLIMIT 8388607
