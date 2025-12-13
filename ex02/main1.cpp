@@ -221,43 +221,53 @@ int main() {
   TEST_END();
 
   // --- セクション 5: インクリメント/デクリメント演算子のテスト
-  // ----------------------
-  TEST_START("5. Increment/Decrement Operators (++f, f++, --f, f--)");
+// ----------------------
+TEST_START("5. Increment/Decrement Operators (++f, f++, --f, f--)");
 
-  Fixed inc(10.0f);
-  Fixed dec(10.0f);
+Fixed inc(10.0f);
+Fixed dec(10.0f);
 
-  std::cout << "Initial Value: inc=" << inc << ", dec=" << dec << std::endl;
+std::cout << "Initial Value: inc=" << inc << ", dec=" << dec << std::endl;
 
-  // 5-1. 前置インクリメント (++f)
-  Fixed inc_pre_result = ++inc;
-  std::cout << "5-1. Pre-increment (++inc): result=" << inc_pre_result
-            << ", inc=" << inc << " (Expected: 11.0, 11.0)" << std::endl;
+// 5-1. 前置インクリメント (++f)
+// raw += 1 → +0.00390625
+Fixed inc_pre_result = ++inc;
+std::cout << "5-1. Pre-increment (++inc): result=" << inc_pre_result
+          << ", inc=" << inc
+          << " (Expected: 10.003906, 10.003906)" << std::endl;
 
-  // 5-2. 後置インクリメント (f++)
-  Fixed inc_post_result = inc++;
-  std::cout << "5-2. Post-increment (inc++): result=" << inc_post_result
-            << ", inc=" << inc << " (Expected: 11.0, 12.0)" << std::endl;
+// 5-2. 後置インクリメント (f++)
+// result は変更前、inc は raw+1
+Fixed inc_post_result = inc++;
+std::cout << "5-2. Post-increment (inc++): result=" << inc_post_result
+          << ", inc=" << inc
+          << " (Expected: 10.003906, 10.007812)" << std::endl;
 
-  // 5-3. 前置デクリメント (--f)
-  Fixed dec_pre_result = --dec;
-  std::cout << "5-3. Pre-decrement (--dec): result=" << dec_pre_result
-            << ", dec=" << dec << " (Expected: 9.0, 9.0)" << std::endl;
+// 5-3. 前置デクリメント (--f)
+// raw -= 1 → -0.00390625
+Fixed dec_pre_result = --dec;
+std::cout << "5-3. Pre-decrement (--dec): result=" << dec_pre_result
+          << ", dec=" << dec
+          << " (Expected: 9.996094, 9.996094)" << std::endl;
 
-  // 5-4. 後置デクリメント (f--)
-  Fixed dec_post_result = dec--;
-  std::cout << "5-4. Post-decrement (dec--): result=" << dec_post_result
-            << ", dec=" << dec << " (Expected: 9.0, 8.0)" << std::endl;
+// 5-4. 後置デクリメント (f--)
+Fixed dec_post_result = dec--;
+std::cout << "5-4. Post-decrement (dec--): result=" << dec_post_result
+          << ", dec=" << dec
+          << " (Expected: 9.996094, 9.992188)" << std::endl;
 
-  // 5-5. 0.0からのインクリメント
-  Fixed zero_inc(0.0f);
-  std::cout << "5-5. ++(0.0f): " << ++zero_inc << std::endl;
+// 5-5. 0.0からのインクリメント
+// 最小単位に上がる
+Fixed zero_inc(0.0f);
+std::cout << "5-5. ++(0.0f): " << ++zero_inc
+          << " (Expected: 0.003906)" << std::endl;
 
-  // 5-6. 負の数のデクリメント
-  Fixed neg_dec(-10.0f);
-  std::cout << "5-6. --(-10.0f): " << --neg_dec << std::endl;
+// 5-6. 負の数のデクリメント
+Fixed neg_dec(-10.0f);
+std::cout << "5-6. --(-10.0f): " << --neg_dec
+          << " (Expected: -10.003906)" << std::endl;
 
-  TEST_END();
+TEST_END();
 
   // --- セクション 6: 静的メンバー関数のテスト (min, max)
   // --------------------------
@@ -343,16 +353,6 @@ int main() {
                     ? "PASS"
                     : "FAIL") // 25.0 == 25.0
             << std::endl;
-
-  // 7-9. インクリメント/デクリメントの連続操作
-  Fixed complex_op(1.0f);
-  Fixed final_result = (++complex_op) + (complex_op++);
-  // complex_opは2.0になる(++complex_op) -> 3.0になる(complex_op++)
-  // final_resultは 2.0 + 2.0 = 4.0
-  std::cout << "7-9. (++1.0f) + (1.0f++): " << final_result
-            << ", final value: " << complex_op << " (Expected: 4.0, 3.0)"
-            << std::endl;
-
   TEST_END();
 
   std::cout << "\n\033[32m=== All Fixed Class Tests Completed ===\033[0m"

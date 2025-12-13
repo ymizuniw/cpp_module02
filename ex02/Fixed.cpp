@@ -1,7 +1,10 @@
 #include "Fixed.hpp"
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <int_part_range_check.hpp>
+#include <string>
+#include <cstring>
 
 void print_msg(std::string msg) { std::cout << msg << std::endl; }
 
@@ -17,7 +20,7 @@ Fixed::~Fixed(void) { print_msg("Fixed::destructor called"); }
 
 Fixed &Fixed::operator=(Fixed const &other) {
   print_msg("Fixed::Copy assignment operator called");
-  value_ = other.value_;
+  value_ = other.value_; 
   return (*this);
 }
 
@@ -106,7 +109,16 @@ float Fixed::toFloat(void) const {
 int Fixed::toInt(void) const { return (value_ >> fbits_); }
 
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed) {
-  os << fixed.toFloat();
+  std::string fnum = std::to_string(fixed.toFloat());
+  size_t dot_place = fnum.find('.');
+  if (dot_place!=std::string::npos)
+  {
+    while (fnum.size()>dot_place + 2 && fnum.back()=='0')
+    {
+      fnum.pop_back();
+    }
+  }
+  os << fnum;
   return (os);
 }
 

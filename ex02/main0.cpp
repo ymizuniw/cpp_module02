@@ -15,7 +15,7 @@
 void print_fixed_status(Fixed &f)
 {
     std::cout << "getRawBits(): " << f.getRawBits() << std::endl;
-    std::cout << "toFloat(): " << f.toFloat() << std::endl;
+    std::cout << "toFloat(): " << f << std::endl;
     std::cout << "" << f.toInt() << std::endl;
 }
 
@@ -24,6 +24,7 @@ int main(void)
     int sigMax = 8388607;
     int sigMin = -8388608;
 
+    std::cout << "Constructor Integer for Calculation" << std::endl;
     Fixed zero(0);
     Fixed one(1);
     Fixed two(2);
@@ -32,6 +33,7 @@ int main(void)
     // Fixed five(5);
     // Fixed six(6);
 
+    std::cout << "Constructor Boundary Check" << std::endl;
     Fixed a(sigMax);
     Fixed b(sigMin);
     Fixed c(std::numeric_limits<int>::max());
@@ -39,6 +41,7 @@ int main(void)
     Fixed e(sigMax/2);
     Fixed f(sigMin/2);
 
+    std::cout << "Print Constructed Threshold Values" << std::endl;
     print_fixed_status(a);
     print_fixed_status(b);
     print_fixed_status(c);
@@ -47,98 +50,99 @@ int main(void)
     print_fixed_status(f);
 
     //addition, subtracting test
-    std::cout << "sigMax + one: ";
+    std::cout << "\nsigMax + one: " << std::endl;
     Fixed a1 = a + one;
     print_fixed_status(a1);
 
-    std::cout << "sigMin - one: ";
+    std::cout << "\nsigMin - one: " << std::endl;
     Fixed a2 = b - one;
     print_fixed_status(a2);
 
-    std::cout << "intMax + 1: ";
+    std::cout << "\nintMax + 1: " << std::endl;
     Fixed a3 = c + one;
     print_fixed_status(a3);
     
-    std::cout << "intMin - 1: ";
+    std::cout << "\nintMin - 1: " << std::endl;
     Fixed a4 = d - one;
     print_fixed_status(a4);
     
-    std::cout << "sigMax/2 + sigMax/2: ";
+    std::cout << "\nsigMax/2 + sigMax/2: " << std::endl;
     Fixed a5 = e + e;
     print_fixed_status(a5);
     
-    std::cout << "sigMax/2 + sigMax/2 + 1: ";
+    std::cout << "\nsigMax/2 + sigMax/2 + 1: " << std::endl;
     Fixed a6 = a5 + one;
     print_fixed_status(a6);
 
-    std::cout << "sigMin/2 + sigMin/2: ";
+    std::cout << "\nsigMin/2 + sigMin/2: " << std::endl;
     Fixed a7 = f + f;
     print_fixed_status(a7);
 
-    std::cout << "sigMin/2 + sigMin/2 - 1: ";
+    std::cout << "\nsigMin/2 + sigMin/2 - 1: " << std::endl;
     Fixed a8 = a7 - one;
     print_fixed_status(a8);
 
     //multipling, deviding test
-    std::cout << "sigMax * 1: ";
+    std::cout << "\nsigMax * 1: " << std::endl;
     Fixed m1 = a * one;
     print_fixed_status(m1);
 
-    std::cout << "sigMin * 1: ";
+    std::cout << "\nsigMin * 1: " << std::endl;
     Fixed m2 = b * one;
     print_fixed_status(m2);
     
-    std::cout << "sigMax * 2: ";
+    std::cout << "\nsigMax * 2: " << std::endl;
     Fixed m1_1 = a * two;
     print_fixed_status(m1_1);
 
-    std::cout << "sigMin * 2: ";
+    std::cout << "\nsigMin * 2: " << std::endl;
     Fixed m2_1 = b * two;
     print_fixed_status(m2_1);
 
-    std::cout << "intMax * 1: ";
+    std::cout << "\nintMax * 1: " << std::endl;
     Fixed m1_2 = c * one;
     print_fixed_status(m1_2);
 
-    std::cout << "intMin * 1: ";
+    std::cout << "\nintMin * 1: " << std::endl;
     Fixed m2_2 = d * one;
     print_fixed_status(m2_2);
 
-    std::cout << "intMax * 2: ";
+    std::cout << "\nintMax * 2: " << std::endl;
     Fixed m1_3 = c * two;
     print_fixed_status(m1_3);
 
-    std::cout << "intMin * 2: ";
+    std::cout << "\nintMin * 2: " << std::endl;
     Fixed m2_3 = b * two;
     print_fixed_status(m2_3);
 
-    std::cout << "sigMax/sigMax: ";
+    std::cout << "\nsigMax/sigMax: " << std::endl;
     Fixed d1 = a / a;
     print_fixed_status(d1);
 
-    std::cout << "sigMax/sigMin: ";
+    std::cout << "\nsigMax/sigMin: " << std::endl;
     Fixed d2 = a / b;
     print_fixed_status(d2);
 
-    std::cout << "sigMin/sigMin: ";
+    std::cout << "\nsigMin/sigMin: " << std::endl;
     Fixed d3 = b / b;
     print_fixed_status(d3);
 
-    std::cout << "sigMin/sigMax: ";
+    std::cout << "\nsigMin/sigMax: " << std::endl;
     Fixed d4 = b / a;
     print_fixed_status(d4);
 
-    std::cout << "1/0: ";
+    std::cout << "\n1/0: " << std::endl;
     Fixed d5 = one / zero;
+    std::cout << one/zero << std::endl;
+    std::cout << d5 << std::endl;
     print_fixed_status(d5);
 
-    std::cout << "0/0: ";
+    std::cout << "\n0/0: " << std::endl;
     Fixed d6 = zero/zero;
     print_fixed_status(d6);
 
-    std::cout << "0/1: ";
+    std::cout << "\n0/1: " << std::endl;
     Fixed d7 = zero/one;
-    print_fixed_status(d7);
-
-    
+    print_fixed_status(d7);    
+    return (0);
 }

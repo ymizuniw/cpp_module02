@@ -30,7 +30,8 @@ $(TEST2): $(TEST2_OBJS)
 #default target builder
 #default target
 NAME=test020
-DEFAULT_SRCS=$(SRCS) $(MAIN2) 
+MAIN0=main0.cpp
+DEFAULT_SRCS=$(SRCS) $(MAIN0)
 DEFAULT_OBJS=$(DEFAULT_SRCS:%.cpp=%.o)
 $(NAME) : $(DEFAULT_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFAULT_OBJS)
@@ -40,10 +41,8 @@ clean:
 	$(RM) -f $(OBJS)
 	$(RM) -f $(TEST1_OBJS)
 	$(RM) -f $(TEST2_OBJS)
-	$(RM) -f main.o
+	find . -maxdepth 1 -type f -name 'main[0-9].o' -delete
 fclean: clean
-	$(RM) -f $(NAME)
-	$(RM) -f $(TEST1)
-	$(RM) -f $(TEST2)
+	rm -f test[0-9][0-9][0-9]
 re: fclean all
 .PHONY : all clean fclean re
