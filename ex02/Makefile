@@ -1,4 +1,5 @@
 #common srcs
+TESTS:=test020	test021	test022
 SRCS=Fixed.cpp\
 	int_part_range_check.cpp
 #common compiler options
@@ -9,40 +10,35 @@ CPPFLAGS=-I.
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
+#test020 builder
+NAME_0=test020
+MAIN_0=main0.cpp
+SRCS_0=$(SRCS) $(MAIN_0)
+OBJS_0=$(SRCS_0:%.cpp=%.o)
+$(NAME_0) : $(OBJS_0)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_0)
 #test021 builder
-TEST1=test021
-MAIN1=main1.cpp
-TEST1_SRCS=$(SRCS) $(MAIN1)
-TEST1_OBJS=$(TEST1_SRCS:%.cpp=%.o)
-test01: $(TEST1)
-$(TEST1): $(TEST1_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(TEST1_OBJS)
+NAME_1=test021
+MAIN_1=main1.cpp
+SRCS_1=$(SRCS) $(MAIN_1)
+OBJS_1=$(SRCS_1:%.cpp=%.o)
+$(NAME_1): $(OBJS_1)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_1)
 
 #test022 builder
-TEST2=test022
-MAIN2=main2.cpp
-TEST2_SRCS=$(SRCS) $(MAIN2)
-TEST2_OBJS=$(TEST2_SRCS:%.cpp=%.o)
-test02: $(TEST2)
-$(TEST2): $(TEST2_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(TEST2_OBJS)
+NAME_2=test022
+MAIN_2=main2.cpp
+SRCS_2=$(SRCS) $(MAIN_2)
+OBJS_2=$(SRCS_2:%.cpp=%.o)
+$(NAME_2): $(OBJS_2)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_2)
 
-#default target builder
-#default target
-NAME=test020
-MAIN0=main0.cpp
-DEFAULT_SRCS=$(SRCS) $(MAIN0)
-DEFAULT_OBJS=$(DEFAULT_SRCS:%.cpp=%.o)
-$(NAME) : $(DEFAULT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFAULT_OBJS)
-
-all : $(NAME)
+all : $(TESTS)
 clean:
-	$(RM) -f $(OBJS)
-	$(RM) -f $(TEST1_OBJS)
-	$(RM) -f $(TEST2_OBJS)
-	find . -maxdepth 1 -type f -name 'main[0-9].o' -delete
+	$(RM) -f $(OBJS_0)
+	$(RM) -f $(OBJS_1)
+	$(RM) -f $(OBJS_2)
 fclean: clean
-	rm -f test[0-9][0-9][0-9]
+	rm -f $(TESTS)
 re: fclean all
 .PHONY : all clean fclean re

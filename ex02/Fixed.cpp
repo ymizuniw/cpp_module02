@@ -1,10 +1,9 @@
 #include "Fixed.hpp"
 #include <cmath>
 #include <cstring>
-#include <limits>
 #include <int_part_range_check.hpp>
+#include <limits>
 #include <string>
-#include <cstring>
 
 void print_msg(std::string msg) { std::cout << msg << std::endl; }
 
@@ -20,7 +19,7 @@ Fixed::~Fixed(void) { print_msg("Fixed::destructor called"); }
 
 Fixed &Fixed::operator=(Fixed const &other) {
   print_msg("Fixed::Copy assignment operator called");
-  value_ = other.value_; 
+  value_ = other.value_;
   return (*this);
 }
 
@@ -111,10 +110,8 @@ int Fixed::toInt(void) const { return (value_ >> fbits_); }
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed) {
   std::string fnum = std::to_string(fixed.toFloat());
   size_t dot_place = fnum.find('.');
-  if (dot_place!=std::string::npos)
-  {
-    while (fnum.size()>dot_place + 2 && fnum.back()=='0')
-    {
+  if (dot_place != std::string::npos) {
+    while (fnum.size() > dot_place + 2 && fnum.back() == '0') {
       fnum.pop_back();
     }
   }
@@ -163,43 +160,61 @@ Fixed Fixed::operator+(const Fixed &other) const {
   Fixed res;
   check_raw_range check_raw_range = int_part_add;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (res);}
-        case(UNDERFLOW): {res.value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (res);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
+    return (res);
+  }
+  case (UNDERFLOW): {
+    res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
+    return (res);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
   res.value_ = value_ + other.value_;
   return (res);
 }
 
 Fixed Fixed::operator-(const Fixed &other) const {
-    Fixed res;  
-    check_raw_range check_raw_range = int_part_subtract;
-    t_range chRange = check_raw_range(value_, other.value_, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (res);}
-        case(UNDERFLOW): {res.value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (res);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
-    res.value_ = value_ - other.value_;
+  Fixed res;
+  check_raw_range check_raw_range = int_part_subtract;
+  t_range chRange = check_raw_range(value_, other.value_, fbits_);
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
+  }
+  case (UNDERFLOW): {
+    res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
+    return (res);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
+  res.value_ = value_ - other.value_;
+  return (res);
 }
 
 Fixed Fixed::operator*(const Fixed &other) const {
-    Fixed res;
-    check_raw_range check_raw_range = int_part_multi;
-    t_range chRange = check_raw_range(value_, other.value_, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (res);}
-        case(UNDERFLOW): {res.value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (res);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
-    int64_t tmp = static_cast<int64_t>(value_) * other.value_;
-    res.value_ = static_cast<int32_t>(tmp>>fbits_);
+  Fixed res;
+  check_raw_range check_raw_range = int_part_multi;
+  t_range chRange = check_raw_range(value_, other.value_, fbits_);
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
+  }
+  case (UNDERFLOW): {
+    res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
+    return (res);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
+  int64_t tmp = static_cast<int64_t>(value_) * other.value_;
+  res.value_ = static_cast<int32_t>(tmp >> fbits_);
+  return (res);
 }
 
 Fixed Fixed::operator/(const Fixed &other) const {
@@ -214,23 +229,31 @@ Fixed Fixed::operator/(const Fixed &other) const {
     int sign = value_ > 0 ? 1 : 0;
     switch (sign) {
     case 1:
-      res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1);
+      res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
       break;
     case 0:
-      res.value_ = (INT_PART_OFLIMIT + 1)<<fbits_;//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+      res.value_ =
+          (INT_PART_OFLIMIT + 1)
+          << fbits_; // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
       break;
     }
     return (res);
   }
-  
+
   check_raw_range check_raw_range = int_part_devide;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (res);}
-        case(UNDERFLOW): {res.value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (res);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
+    return (res);
+  }
+  case (UNDERFLOW): {
+    res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
+    return (res);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
   int64_t v1 = static_cast<int64_t>(value_) * (1 << fbits_);
   int64_t v2 = other.value_;
   int64_t n = v1 / v2;
@@ -240,56 +263,68 @@ Fixed Fixed::operator/(const Fixed &other) const {
 
 Fixed Fixed::operator++(int) {
   Fixed tmp(*this);
-  
+
   check_raw_range check_raw_range = int_part_postfix_increment;
-    t_range chRange = check_raw_range(value_, 0, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {tmp.value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (tmp);}
-        default: break;
-    }
-    value_ += 1;
+  t_range chRange = check_raw_range(value_, 0, fbits_);
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    tmp.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (tmp);
+  }
+  default:
+    break;
+  }
+  value_ += 1;
+  return (tmp);
 }
 
 Fixed Fixed::operator--(int) {
   Fixed tmp(*this);
-  
+
   check_raw_range check_raw_range = int_part_postfix_decrement;
-    t_range chRange = check_raw_range(value_, 0, fbits_);
-    switch((int)chRange)
-    {
-        case(UNDERFLOW): {tmp.value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (tmp);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
+  t_range chRange = check_raw_range(value_, 0, fbits_);
+  switch ((int)chRange) {
+  case (UNDERFLOW): {
+    tmp.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
+    return (tmp);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
   value_ -= 1;
   return (tmp);
 }
 
 Fixed &Fixed::operator++(void) {
-  
-    check_raw_range check_raw_range = int_part_prefix_increment;
-    t_range chRange = check_raw_range(value_, 0, fbits_);
-    switch((int)chRange)
-    {
-        case(OVERFLOW): {value_ = (INT_PART_OFLIMIT << fbits_) | ((1<<fbits_) - 1); return (*this);}
-        default: break;
-    }
-    value_++;
+
+  check_raw_range check_raw_range = int_part_prefix_increment;
+  t_range chRange = check_raw_range(value_, 0, fbits_);
+  switch ((int)chRange) {
+  case (OVERFLOW): {
+    value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (*this);
+  }
+  default:
+    break;
+  }
+  value_++;
+  return (*this);
 }
 
 Fixed &Fixed::operator--(void) {
-  
-    check_raw_range check_raw_range = int_part_prefix_decrement;
-    t_range chRange = check_raw_range(value_, 0, fbits_);
-    switch((int)chRange)
-    {
-        case(UNDERFLOW): {value_ = ((INT_PART_OFLIMIT + 1)<<fbits_); return (*this);}//ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
-        default: break;
-    }
-    value_--;
+
+  check_raw_range check_raw_range = int_part_prefix_decrement;
+  t_range chRange = check_raw_range(value_, 0, fbits_);
+  switch ((int)chRange) {
+  case (UNDERFLOW): {
+    value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (*this);
+  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  default:
+    break;
+  }
+  value_--;
+  return (*this);
 }
 
 // if equal, return left operand
