@@ -3,38 +3,43 @@
 #include <LinearEquation.hpp>
 #include <Point.hpp>
 
-bool bsp(Point const a, Point const b, Point const c, Point const point) {
-  // if vertex or edge
-  // return false
-  Fixed minus(-1);
-  // in out judgement
-  Fixed trend1 = ((a.getY() - b.getY())) / ((a.getX() - b.getX()));
-  Fixed trend2 = ((b.getY() - c.getY())) / ((b.getX() - c.getX()));
-  Fixed trend3 = ((c.getY() - a.getY())) / ((c.getX() - a.getX()));
+// twice of the real size
+Fixed getAriaSize(Fixed x1, Fixed y2, Fixed x2, Fixed y1) {
+  Fixed ariaSize = (x1 * y2 - x2 * y1);
+  if (ariaSize < Fixed(0))
+    return (Fixed(-1) * ariaSize);
+  return (ariaSize);
+}
 
-  // ax + by + c = 0
+bool bsp(Point const a, Point const b, Point const c, Point const p) {
 
+  // Area Size
+  Point bt0(b.getX() - a.getX(), b.getY() - a.getY());
+  Point ct0(c.getX() - a.getX(), c.getY() - a.getY());
+  Fixed AreaSize = getAriaSize(bt0.getX(), ct0.getY(), ct0.getX(), bt0.getY());
+  if (AreaSize == Fixed(0))
+    return (false);
+  // translate()
+  Point at(a.getX() - p.getX(), a.getY() - p.getY());
+  Point bt(b.getX() - p.getX(), b.getY() - p.getY());
+  Point ct(c.getX() - p.getX(), c.getY() - p.getY());
+  // Partial Arias
+  Fixed ABP = getAriaSize(at.getX(), bt.getY(), bt.getX(), at.getY());
+  Fixed BCP = getAriaSize(bt.getX(), ct.getY(), ct.getX(), bt.getY());
+  Fixed CAP = getAriaSize(ct.getX(), at.getY(), at.getX(), ct.getY());
+  if (ABP == Fixed(0) || BCP == Fixed(0) || CAP == Fixed(0))
+    return (false);
+  Fixed PartSum = ABP + BCP + CAP;
+  if (PartSum == AreaSize)
+    return (true);
+  return (false);
+  // solve about y=0;
   /*
-    1. construct line 1, 2, 3
-  */
-  //   Line l1();
-  //   Line l2();
-  //   Line l3();
-
-  /*
-    3.seek X range
-  */
-
-  /*
-    5.move paralell to origin point
-  */
-
-  /*
-    6.solve y = 0 for each line.
-  */
-
-  /*
-    7.if different two solutions have different sign x? then return true; else
-    return false;
+    原点O（0,0）と、点P1(x1, y1),P2(y1,y2)による三角形の面積Sは、
+    S = (1/2) * (x1*y2 - x2*y1);
+    または、
+    S = (1/2) * (x2*y1 - x1 * y2);
+    で求められる。
+    参考：https://ouchimath.com/3point-menseki/
   */
 }
