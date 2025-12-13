@@ -4,12 +4,7 @@
 #define INT_PART_UFLIMIT -8388608
 #define INT_PART_OFLIMIT 8388607
 
-typedef enum e_range
-{
-  CLEAR,
-  INT_PART_OVERFLOW,
-  INT_PART_UNDERFLOW
-} t_range;
+typedef enum e_range { CLEAR, INT_PART_OVERFLOW, INT_PART_UNDERFLOW } t_range;
 
 typedef t_range (*check_raw_range)(int value1, int value2, int fbits);
 

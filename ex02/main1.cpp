@@ -1,5 +1,4 @@
 #include <Fixed.hpp>
-
 #include <cmath>
 #include <iomanip>
 #include <iostream>

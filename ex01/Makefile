@@ -4,13 +4,13 @@ SRCS = Fixed.cpp \
 INCS = -I.
 OBJS=$(SRCS:%.cpp=%.o)
 
-CPP = c++
-CFLAGS = -std=c++98 -Wall -Wextra -Werror
+CXX = c++
+CXXCFLAGS = -std=c++98 -Wall -Wextra -Werror
 
 $(NAME): $(OBJS)
-	$(CPP) $(CFLAGS) -o $@ $(OBJS)
+	$(CXX) $(CXXCFLAGS) -o $@ $(OBJS)
 %.o: %.cpp
-	$(CPP) $(CFLAGS) $(INCS) -c $< -o $@
+	$(CXX) $(CXXCFLAGS) $(INCS) -c $< -o $@
 
 all: $(NAME)
 clean:
