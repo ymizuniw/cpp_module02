@@ -1,6 +1,5 @@
 #include <Fixed.hpp>
 #include <Point.hpp>
-#include <iostream>
 
 long AreaSize(const Point &u, const Point &v) {
   long tmp = static_cast<long>(u.getX().getRawBits()) *
