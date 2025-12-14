@@ -17,14 +17,16 @@ bool bsp(Point const a, Point const b, Point const c, Point const p) {
   Point bp(b.getX() - p.getX(), b.getY() - p.getY());
   Point cp(c.getX() - p.getX(), c.getY() - p.getY());
 
-  Point bp_ap(bp.getX() - ap.getX(), bp.getY() - ap.getY());
-  Point cp_ap(cp.getX() - ap.getX(), cp.getY() - ap.getY());
+  Point ab(bp.getX() - ap.getX(), bp.getY() - ap.getY());
+  Point ac(cp.getX() - ap.getX(), cp.getY() - ap.getY());
 
-  long S = AreaSize(bp_ap, cp_ap);
+  long S = AreaSize(ab, ac);
   long S1 = AreaSize(ap, bp);
   long S2 = AreaSize(bp, cp);
   long S3 = AreaSize(cp, ap);
   if (S1 == 0 || S2 == 0 || S3 == 0)
     return false;
-  return (S1 + S2 + S3 == S);
+  if (S1 + S2 + S3 == S)
+    return (true);
+  return (false);
 }
