@@ -1,8 +1,10 @@
 #include "Fixed.hpp"
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <int_part_range_check.hpp>
 #include <limits>
+#include <sstream>
 #include <string>
 
 void print_msg(std::string msg) { std::cout << msg << std::endl; }
@@ -54,7 +56,6 @@ Fixed::Fixed(const int value) : value_(0) {
   print_msg("Fixed::int value constructor called");
 }
 
-// float -> int -> shift
 Fixed::Fixed(const float value) {
   print_msg("Fixed::float value constructor called");
   if (static_cast<double>(value) > static_cast<double>(INT_PART_OFLIMIT)) {
@@ -107,12 +108,28 @@ float Fixed::toFloat(void) const {
 
 int Fixed::toInt(void) const { return (value_ >> fbits_); }
 
+std::string toString(float fnum) {
+  std::stringstream ss;
+  std::string res;
+
+  ss << fnum;
+  res = ss.str();
+  if (res.find(".") == std::string::npos) {
+    res.append(".0");
+  }
+  return res;
+}
+
 std::ostream &operator<<(std::ostream &os, const Fixed &fixed) {
-  std::string fnum = std::to_string(fixed.toFloat());
+  std::string fnum = toString(fixed.toFloat());
   size_t dot_place = fnum.find('.');
   if (dot_place != std::string::npos) {
-    while (fnum.size() > dot_place + 2 && fnum.back() == '0') {
-      fnum.pop_back();
+    while (fnum.size() > dot_place + 2 && fnum[fnum.size() - 1] == '0') {
+      if (!fnum.empty())
+        fnum.erase(fnum.size() - 1);
+      if (fnum[fnum.size() - 1] == '.') {
+        fnum.append("0");
+      }
     }
   }
   os << fnum;
@@ -161,11 +178,11 @@ Fixed Fixed::operator+(const Fixed &other) const {
   check_raw_range check_raw_range = int_part_add;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
   }
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
   }
@@ -181,11 +198,11 @@ Fixed Fixed::operator-(const Fixed &other) const {
   check_raw_range check_raw_range = int_part_subtract;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
   }
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
   }
@@ -201,11 +218,11 @@ Fixed Fixed::operator*(const Fixed &other) const {
   check_raw_range check_raw_range = int_part_multi;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
   }
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
   }
@@ -221,8 +238,8 @@ Fixed Fixed::operator/(const Fixed &other) const {
   Fixed res;
 
   if (other.value_ == 0) {
+    std::cerr << "n/0 occurred!" << std::endl;
     if (value_ == 0) {
-      std::cerr << "0/0 occurred!" << std::endl;
       res.value_ = 0;
       return (res);
     }
@@ -241,11 +258,11 @@ Fixed Fixed::operator/(const Fixed &other) const {
   check_raw_range check_raw_range = int_part_devide;
   t_range chRange = check_raw_range(value_, other.value_, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (res);
   }
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
   }
@@ -265,7 +282,7 @@ Fixed Fixed::operator++(int) {
   check_raw_range check_raw_range = int_part_postfix_increment;
   t_range chRange = check_raw_range(value_, 0, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     tmp.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (tmp);
   }
@@ -282,7 +299,7 @@ Fixed Fixed::operator--(int) {
   check_raw_range check_raw_range = int_part_postfix_decrement;
   t_range chRange = check_raw_range(value_, 0, fbits_);
   switch ((int)chRange) {
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     tmp.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (tmp);
   }
@@ -298,7 +315,7 @@ Fixed &Fixed::operator++(void) {
   check_raw_range check_raw_range = int_part_prefix_increment;
   t_range chRange = check_raw_range(value_, 0, fbits_);
   switch ((int)chRange) {
-  case (OVERFLOW): {
+  case (INT_PART_OVERFLOW): {
     value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
     return (*this);
   }
@@ -314,7 +331,7 @@ Fixed &Fixed::operator--(void) {
   check_raw_range check_raw_range = int_part_prefix_decrement;
   t_range chRange = check_raw_range(value_, 0, fbits_);
   switch ((int)chRange) {
-  case (UNDERFLOW): {
+  case (INT_PART_UNDERFLOW): {
     value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (*this);
   }

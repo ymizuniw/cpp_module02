@@ -59,7 +59,6 @@ Fixed::Fixed(const float value) {
     std::cerr << "recept int value overflows. Fixed can repareset "
                  "-8,388,608~8,388,608"
               << std::endl;
-  // shift float
   float shift = value * (1 << fbits_);
   float round = roundf(shift);
   int cast = static_cast<int>(round);

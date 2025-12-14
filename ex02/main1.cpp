@@ -207,16 +207,6 @@ int main() {
   std::cout << "4-14. 1 / 8.0 = " << div_small << " (Expected: 0.125)"
             << std::endl;
 
-  // 4-15. ゼロ除算 (実装によって挙動が異なる可能性があります)
-  std::cout << "4-15. Division by zero (Should handle error or result in "
-               "max/min value): ";
-  // try { Fixed div_zero = x / Fixed(0); } catch (...) { std::cout << "Caught
-  // exception/Error." << std::endl; }
-  // ゼロ除算のテストは、Fixedクラスの実装に依存するため、コメントアウトまたは注意を促すに留めます。
-  std::cout << "Test skipped due to implementation dependency. (Expected: "
-               "Error handling)"
-            << std::endl;
-
   TEST_END();
 
   // --- セクション 5: インクリメント/デクリメント演算子のテスト
