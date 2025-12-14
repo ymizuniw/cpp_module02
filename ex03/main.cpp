@@ -1,44 +1,71 @@
+#include <Point.hpp>
 #include <cassert>
-#include <cstdio>
 #include <cstring>
-#include <iomanip>
 #include <iostream>
-#include <limits>
 
-uint32_t as_bits(float x) {
-  uint32_t u;
-  std::memcpy(&u, &x, sizeof(float));
-  return u;
-}
+bool bsp(Point const a, Point const b, Point const c, Point const p);
 
 int main(void) {
-  float denormMin;
-  float epsilon;
-  float nextAfter0 = std::nextafterf(0.0f, 3.0f);
-  float nextAfter1 = std::nextafterf(1.0f, 3.0f);
-  //   float c;
+  Point a(0, 0);
+  Point b(10, 0);
+  Point c(0, 10);
 
-  std::cout << std::setw(15) << std::left << "nextAfter0: " << nextAfter0
-            << std::endl;
-  std::cout << std::setw(15) << std::left << "nextAfter1: " << nextAfter1
-            << std::endl;
+  Point p1(2, 2);   // inside
+  Point p2(10, 10); // outside
+  Point p3(5, 0);   // on edge
+  Point p4(0, 0);   // vertex
+  Point p5(-1, 0);  // outside (extension)
 
-  denormMin = std::numeric_limits<float>::denorm_min();
-  epsilon = std::numeric_limits<float>::epsilon();
+  std::cout << bsp(a, b, c, p1) << std::endl; // 1
+  std::cout << bsp(a, b, c, p2) << std::endl; // 0
+  std::cout << bsp(a, b, c, p3) << std::endl; // 0
+  std::cout << bsp(a, b, c, p4) << std::endl; // 0
+  std::cout << bsp(a, b, c, p5) << std::endl; // 0
 
-  float x1 = 1.0f;
-  float y1 = x1 + denormMin;
-  float y2 = x1 + epsilon;
-  float y4 = x1 + 1.192010e-07;
+  // float test
+  Point af(0.1f, 0.1f);
+  Point bf(9.9f, 0.2f);
+  Point cf(0.3f, 9.8f);
 
-  std::cout << std::setw(15) << std::left << "denormMin: " << denormMin
-            << std::endl;
-  std::cout << std::setw(15) << std::left << "epsilon: " << epsilon
-            << std::endl;
+  Point pf1(1.0f, 1.0f); // inside
+  Point pf2(0.0001f, 0.0001f);
+  Point pf3(5.0f, 0.0000001f);
 
-  printf("x1 : %a\n", x1);
-  printf("y1 : %a\n", y1);
-  printf("y2 : %a\n", y2);
-  printf("y4 : %a\n", y4);
-  return (0);
+  std::cout << bsp(af, bf, cf, pf1) << std::endl; // 1
+  std::cout << bsp(af, bf, cf, pf2) << std::endl; // 0
+  std::cout << bsp(af, bf, cf, pf3) << std::endl; // 0
+
+  Point ae(0, 0);
+  Point be(1000000, 1);
+  Point ce(0, 2);
+  Point pe(1, 1);                                // inside
+  std::cout << bsp(ae, be, ce, pe) << std::endl; // 1
+
+  const float LSB = 1.0f / 256.0f;
+
+  // --- inside, but very close to edge ---
+  Point t1(LSB * 2, LSB * 2); // > 1 LSB inside
+  Point t2(LSB * 1.1f, LSB * 1.1f);
+  Point t3(LSB * 0.99f, LSB * 0.99f); // < 1 LSB (quantizes to 0)
+
+  std::cout << bsp(a, b, c, t1) << std::endl; // expected: 1
+  std::cout << bsp(a, b, c, t2) << std::endl; // expected: 1
+  std::cout << bsp(a, b, c, t3) << std::endl; // expected: 0
+
+  // --- near edge y=0 ---
+  Point t4(5.0f, LSB * 2);    // clearly above edge
+  Point t5(5.0f, LSB * 1.0f); // exactly 1 LSB
+  Point t6(5.0f, LSB * 0.5f); // below threshold
+
+  std::cout << bsp(a, b, c, t4) << std::endl; // expected: 1
+  std::cout << bsp(a, b, c, t5) << std::endl; // expected: 1
+  std::cout << bsp(a, b, c, t6) << std::endl; // expected: 0
+
+  // --- corner threshold ---
+  Point t7(LSB * 1.0f, 0.0f); // on edge after quantization
+  Point t8(LSB * 2.0f, 0.0f); // still on edge geometrically
+
+  std::cout << bsp(a, b, c, t7) << std::endl; // expected: 0
+  std::cout << bsp(a, b, c, t8) << std::endl; // expected: 0
+  return 0;
 }

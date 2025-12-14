@@ -1,13 +1,14 @@
-NAME=test00
+CPPFLAGS=-I.
+OBJS=$(SRCS:%.cpp=%.o)
+CXX=c++
+CXXFLAGS=-std=c++98 -Wall -Wextra -Werror
+
+NAME=test030
 SRCS=bsp.cpp\
 Fixed.cpp\
 int_part_range_check.cpp\
 Point.cpp\
 main.cpp
-CPPFLAGS=-I.
-OBJS=$(SRCS:%.cpp=%.o)
-CXX=c++
-CXXFLAGS=-std=c++98 -Wall -Wextra -Werror
 
 all : $(NAME)
 clean:
