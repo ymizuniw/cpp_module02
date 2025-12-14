@@ -1,6 +1,3 @@
-#include <Fixed.hpp>
-#include <Line.hpp>
-#include <LinearEquation.hpp>
 #include <Point.hpp>
 
 // twice of the real size

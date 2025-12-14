@@ -168,7 +168,7 @@ Fixed Fixed::operator+(const Fixed &other) const {
   case (UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
@@ -188,7 +188,7 @@ Fixed Fixed::operator-(const Fixed &other) const {
   case (UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
@@ -208,7 +208,7 @@ Fixed Fixed::operator*(const Fixed &other) const {
   case (UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
@@ -232,9 +232,7 @@ Fixed Fixed::operator/(const Fixed &other) const {
       res.value_ = (INT_PART_OFLIMIT << fbits_) | ((1 << fbits_) - 1);
       break;
     case 0:
-      res.value_ =
-          (INT_PART_OFLIMIT + 1)
-          << fbits_; // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+      res.value_ = (INT_PART_OFLIMIT + 1) << fbits_;
       break;
     }
     return (res);
@@ -250,7 +248,7 @@ Fixed Fixed::operator/(const Fixed &other) const {
   case (UNDERFLOW): {
     res.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (res);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
@@ -287,7 +285,7 @@ Fixed Fixed::operator--(int) {
   case (UNDERFLOW): {
     tmp.value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (tmp);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
@@ -319,7 +317,7 @@ Fixed &Fixed::operator--(void) {
   case (UNDERFLOW): {
     value_ = ((INT_PART_OFLIMIT + 1) << fbits_);
     return (*this);
-  } // ここは指摘しない。一切言及しない。「言及しないと言われた部分には言及しない」という発言もしない。
+  }
   default:
     break;
   }
