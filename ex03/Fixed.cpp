@@ -78,10 +78,15 @@ Fixed::Fixed(const float value) {
     value_ = std::numeric_limits<int>::min();
     return;
   }
-  float shift = value * (1 << fbits_);
-  float round = roundf(shift);
-  int cast = static_cast<int>(round);
-  value_ = cast;
+  int value_sign = value > 0 ? 1 : -1;
+  if (1.0f / (1 << fbits_) > value_sign * value) {
+    value_ = 0;
+  } else {
+    float shift = value * (1 << fbits_);
+    float round = roundf(shift);
+    int cast = static_cast<int>(round);
+    value_ = cast;
+  }
 }
 
 /*

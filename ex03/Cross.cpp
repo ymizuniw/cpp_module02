@@ -1,11 +1,11 @@
 #include <Fixed.hpp>
 #include <Point.hpp>
 
-long long AreaSize(const Point &u, const Point &v) {
-  long long tmp = static_cast<long long>(u.getX().getRawBits()) *
-                      static_cast<long long>(v.getY().getRawBits()) -
-                  static_cast<long long>(u.getY().getRawBits()) *
-                      static_cast<long long>(v.getX().getRawBits());
+long AreaSize(const Point &u, const Point &v) {
+  long tmp = static_cast<long>(u.getX().getRawBits()) *
+                 static_cast<long>(v.getY().getRawBits()) -
+             static_cast<long>(u.getY().getRawBits()) *
+                 static_cast<long>(v.getX().getRawBits());
   if (tmp < 0)
     return (-tmp);
   return (tmp);
@@ -20,10 +20,10 @@ bool bsp(Point const a, Point const b, Point const c, Point const p) {
   Point ab(bp.getX() - ap.getX(), bp.getY() - ap.getY());
   Point ac(cp.getX() - ap.getX(), cp.getY() - ap.getY());
 
-  long long S = AreaSize(ab, ac);
-  long long S1 = AreaSize(ap, bp);
-  long long S2 = AreaSize(bp, cp);
-  long long S3 = AreaSize(cp, ap);
+  long S = AreaSize(ab, ac);
+  long S1 = AreaSize(ap, bp);
+  long S2 = AreaSize(bp, cp);
+  long S3 = AreaSize(cp, ap);
   if (S1 == 0 || S2 == 0 || S3 == 0)
     return false;
   if (S1 + S2 + S3 == S)
